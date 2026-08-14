@@ -22,6 +22,7 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 RUN npm ci --include=dev
+RUN npm install --global @anthropic-ai/claude-code @openai/codex
 
 COPY . .
 RUN npm run build:factory

@@ -98,41 +98,41 @@
 
 **Задачи:**
 
-- [ ] **Task 2.1: Базовый интерфейс AI Provider**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/providers/base.ts` с интерфейсом `IProvider`
-  - [ ] Определить методы: `generateCode(prompt, context)`, `analyzeScreenshot(imageBase64, context)`, `fixBug(code, error, context)`
-  - [ ] Добавить типы для ответов: `CodeResponse`, `AnalysisResponse`, `FixResponse`
-  - [ ] **Файлы:** `src/providers/base.ts`
-  - [ ] **Логирование:** `DEBUG` для определения интерфейса
+- [x] **Task 2.1: Базовый интерфейс AI Provider**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/providers/base.ts` с интерфейсом `IProvider`
+  - [x] Определить методы: `generateCode(prompt, context)`, `analyzeScreenshot(imageBase64, context)`, `fixBug(code, error, context)`
+  - [x] Добавить типы для ответов: `CodeResponse`, `AnalysisResponse`, `FixResponse`
+  - [x] **Файлы:** `src/providers/base.ts`
+  - [x] **Логирование:** `DEBUG` для определения интерфейса
 
-- [ ] **Task 2.2: Claude Code Provider**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/providers/claude.ts` реализующий `IProvider`
-  - [ ] Использовать Claude Code SDK для вызова агентов
-  - [ ] Реализовать retry-логику (3 попытки с экспоненциальным backoff)
-  - [ ] Добавить обработку rate limits и таймаутов
-  - [ ] **Файлы:** `src/providers/claude.ts`
-  - [ ] **Логирование:** `INFO` для каждого запроса, `WARN` при retry, `ERROR` при исчерпании попыток
-  - [ ] **Тесты:** `tests/providers/claude.test.ts` - моки вызовов API
-  - [ ] **Зависит от:** Task 2.1
+- [x] **Task 2.2: Claude Code Provider**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/providers/claude.ts` реализующий `IProvider`
+  - [x] Использовать Claude Code SDK для вызова агентов
+  - [x] Реализовать retry-логику (3 попытки с экспоненциальным backoff)
+  - [x] Добавить обработку rate limits и таймаутов
+  - [x] **Файлы:** `src/providers/claude.ts`
+  - [x] **Логирование:** `INFO` для каждого запроса, `WARN` при retry, `ERROR` при исчерпании попыток
+  - [x] **Тесты:** `tests/providers/claude.test.ts` - моки вызовов API
+  - [x] **Зависит от:** Task 2.1
 
-- [ ] **Task 2.3: Codex Provider (заглушка)**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/providers/codex.ts` реализующий `IProvider`
-  - [ ] Реализовать базовую структуру (методы возвращают моки)
-  - [ ] Добавить TODO-комментарии для будущей интеграции
-  - [ ] **Файлы:** `src/providers/codex.ts`
-  - [ ] **Логирование:** `WARN` "Codex provider is a stub, returning mock data"
-  - [ ] **Тесты:** `tests/providers/codex.test.ts` - проверка mock responses
-  - [ ] **Зависит от:** Task 2.1
+- [x] **Task 2.3: Codex Provider (реальная CLI-интеграция вместо заглушки)**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/providers/codex.ts` реализующий `IProvider`
+  - [x] Реализовать базовую структуру с вызовом Codex CLI и JSONL parsing
+  - [x] Добавить обработку недоступного CLI без фиктивных production-ответов
+  - [x] **Файлы:** `src/providers/codex.ts`
+  - [x] **Логирование:** `INFO` для запросов, `WARN` при недоступности, `ERROR` при сбое
+  - [x] **Тесты:** `tests/providers/codex.test.ts` - проверка CLI responses
+  - [x] **Зависит от:** Task 2.1
 
-- [ ] **Task 2.4: Provider Factory и Auto-selection**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/providers/factory.ts`
-  - [ ] Реализовать `createProvider(type: 'claude' | 'codex' | 'auto')`
-  - [ ] При `auto` проверять доступность провайдеров (пинг API или проверка переменных окружения)
-  - [ ] Добавить fallback-цепочку: Claude → Codex → Error
-  - [ ] **Файлы:** `src/providers/factory.ts`
-  - [ ] **Логирование:** `INFO` для выбранного провайдера, `DEBUG` для проверок доступности
-  - [ ] **Тесты:** `tests/providers/factory.test.ts` - сценарии auto-selection
-  - [ ] **Зависит от:** Task 2.2, Task 2.3
+- [x] **Task 2.4: Provider Factory и Auto-selection**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/providers/factory.ts`
+  - [x] Реализовать `createProvider(type: 'claude' | 'codex' | 'auto')`
+  - [x] При `auto` проверять доступность провайдеров (пинг API или проверка переменных окружения)
+  - [x] Добавить fallback-цепочку: Claude → Codex → Error
+  - [x] **Файлы:** `src/providers/factory.ts`
+  - [x] **Логирование:** `INFO` для выбранного провайдера, `DEBUG` для проверок доступности
+  - [x] **Тесты:** `tests/providers/factory.test.ts` - сценарии auto-selection
+  - [x] **Зависит от:** Task 2.2, Task 2.3
 
 ---
 

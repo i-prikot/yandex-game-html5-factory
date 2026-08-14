@@ -9,9 +9,11 @@ services:
     shm_size: 1gb
     environment:
       AI_PROVIDER: ${AI_PROVIDER:-auto}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       GAME_QUALITY: ${GAME_QUALITY:-auto}
       GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
       LOG_LEVEL: ${LOG_LEVEL:-debug}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium
       TRIPO3D_API_KEY: ${TRIPO3D_API_KEY:-}
       XAI_API_KEY: ${XAI_API_KEY:-}
@@ -22,7 +24,11 @@ services:
       - ./projects:/app/projects
       - ./output:/app/output
       - ./screenshots:/app/screenshots
+      - claude-config:/root/.claude
+      - codex-config:/root/.codex
       - factory-node-modules:/app/node_modules
 
 volumes:
+  claude-config:
+  codex-config:
   factory-node-modules:
