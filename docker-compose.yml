@@ -1,0 +1,28 @@
+services:
+  factory:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    init: true
+    stdin_open: true
+    tty: true
+    shm_size: 1gb
+    environment:
+      AI_PROVIDER: ${AI_PROVIDER:-auto}
+      GAME_QUALITY: ${GAME_QUALITY:-auto}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium
+      TRIPO3D_API_KEY: ${TRIPO3D_API_KEY:-}
+      XAI_API_KEY: ${XAI_API_KEY:-}
+      YGG_SDK_ENABLED: ${YGG_SDK_ENABLED:-true}
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./projects:/app/projects
+      - ./output:/app/output
+      - ./screenshots:/app/screenshots
+      - factory-node-modules:/app/node_modules
+
+volumes:
+  factory-node-modules:

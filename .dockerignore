@@ -1,0 +1,10 @@
+.git
+.research
+.env
+node_modules
+dist
+projects
+output
+screenshots
+coverage
+*.log

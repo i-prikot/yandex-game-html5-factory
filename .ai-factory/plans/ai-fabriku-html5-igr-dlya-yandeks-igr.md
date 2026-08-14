@@ -65,32 +65,32 @@
 
 **Задачи:**
 
-- [ ] **Task 1.1: Настройка базовой структуры проекта**
-  - [ ] Создать корневую структуру: `src/`, `templates/`, `output/`, `tests/`, `docs/`
-  - [ ] Инициализировать TypeScript проект с tsconfig для Node.js
-  - [ ] Настроить `package.json` с зависимостями: `puppeteer`, `typescript`, `@types/node`
-  - [ ] Создать `.env.example` с переменными: `GOOGLE_API_KEY`, `XAI_API_KEY`, `TRIPO3D_API_KEY`, `AI_PROVIDER`, `GAME_QUALITY`
-  - [ ] **Файлы:** `package.json`, `tsconfig.json`, `.env.example`, структура папок
-  - [ ] **Логирование:** `INFO` при создании каждой директории
+- [x] **Task 1.1: Настройка базовой структуры проекта**
+  - [x] Создать корневую структуру: `src/`, `templates/`, `output/`, `tests/`, `docs/`
+  - [x] Инициализировать TypeScript проект с tsconfig для Node.js
+  - [x] Настроить `package.json` с зависимостями: `puppeteer`, `typescript`, `@types/node`
+  - [x] Создать `.env.example` с переменными: `GOOGLE_API_KEY`, `XAI_API_KEY`, `TRIPO3D_API_KEY`, `AI_PROVIDER`, `GAME_QUALITY`
+  - [x] **Файлы:** `package.json`, `tsconfig.json`, `.env.example`, структура папок
+  - [x] **Логирование:** `INFO` при создании каждой директории
 
-- [ ] **Task 1.2: Docker-окружение для Windows**
-  - [ ] Создать `Dockerfile` на базе `node:22-bullseye`
-  - [ ] Установить Chromium, xvfb и зависимости для headless-режима
-  - [ ] Настроить переменные `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true` и `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium`
-  - [ ] Создать `docker-compose.yml` с монтированием volumes и портами (5173 для Vite)
-  - [ ] Создать `start.bat` для запуска под Windows одной командой
-  - [ ] **Файлы:** `Dockerfile`, `docker-compose.yml`, `start.bat`
-  - [ ] **Логирование:** `DEBUG` при установке каждого пакета в Docker
+- [x] **Task 1.2: Docker-окружение для Windows**
+  - [x] Создать `Dockerfile` на базе `node:22-bullseye`
+  - [x] Установить Chromium, xvfb и зависимости для headless-режима
+  - [x] Настроить переменные `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true` и `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium`
+  - [x] Создать `docker-compose.yml` с монтированием volumes и портами (5173 для Vite)
+  - [x] Создать `start.bat` для запуска под Windows одной командой
+  - [x] **Файлы:** `Dockerfile`, `docker-compose.yml`, `start.bat`
+  - [x] **Логирование:** `DEBUG` при установке каждого пакета в Docker
 
-- [ ] **Task 1.3: Базовый CLI интерфейс**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/cli/index.ts` с interactive prompts
-  - [ ] Реализовать выбор типа игры: 2D / 3D
-  - [ ] Реализовать выбор quality preset: LOW / MEDIUM / HIGH / AUTO
-  - [ ] Реализовать ввод описания игры (текстовый промпт)
-  - [ ] Добавить команду `npm run cli` в `package.json`
-  - [ ] **Файлы:** `src/cli/index.ts`, обновить `package.json`
-  - [ ] **Логирование:** `INFO` для каждого пользовательского выбора, `DEBUG` для валидации входных данных
-  - [ ] **Тесты:** `tests/cli/prompts.test.ts` - проверка валидации inputs
+- [x] **Task 1.3: Базовый CLI интерфейс**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/cli/index.ts` с interactive prompts
+  - [x] Реализовать выбор типа игры: 2D / 3D
+  - [x] Реализовать выбор quality preset: LOW / MEDIUM / HIGH / AUTO
+  - [x] Реализовать ввод описания игры (текстовый промпт)
+  - [x] Добавить команду `npm run cli` в `package.json`
+  - [x] **Файлы:** `src/cli/index.ts`, обновить `package.json`
+  - [x] **Логирование:** `INFO` для каждого пользовательского выбора, `DEBUG` для валидации входных данных
+  - [x] **Тесты:** `tests/cli/prompts.test.ts` - проверка валидации inputs
 
 ---
 

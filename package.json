@@ -1,0 +1,35 @@
+{
+  "name": "yandex-games-ai-factory",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:factory": "npm run build",
+    "cli": "tsx src/cli/index.ts",
+    "start:cli": "node dist/cli/index.js",
+    "test": "vitest run",
+    "test:unit": "vitest run tests --exclude tests/acceptance/**",
+    "test:acceptance": "vitest run tests/acceptance --testTimeout=120000",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.8.4",
+    "archiver": "^7.0.1",
+    "dotenv": "^17.2.1",
+    "pngjs": "^7.0.0",
+    "puppeteer": "^24.16.0",
+    "zod": "^4.0.17"
+  },
+  "devDependencies": {
+    "@types/archiver": "^6.0.3",
+    "@types/node": "^24.2.1",
+    "@types/pngjs": "^6.0.5",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,4 +1,11 @@
-.claude
-.codex
-.opencode
-.ai-factory.json
+node_modules/
+dist/
+.env
+.research/
+projects/*
+!projects/.gitkeep
+output/*
+!output/.gitkeep
+screenshots/
+coverage/
+*.log
