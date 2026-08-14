@@ -140,45 +140,45 @@
 
 **Задачи:**
 
-- [ ] **Task 3.1: Asset Manager Core**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/asset-pipeline/manager.ts`
-  - [ ] Реализовать метод `resolveAssets(assets: AssetRequest[], projectPath: string)`
-  - [ ] Определить тип `AssetRequest` с полями: `type`, `name`, `description`, `tags`
-  - [ ] Реализовать 3-уровневый fallback: AI → Local → Procedural
-  - [ ] **Файлы:** `src/asset-pipeline/manager.ts`, `src/asset-pipeline/types.ts`
-  - [ ] **Логирование:** `INFO` для каждого ассета, `DEBUG` для каждого уровня fallback
+- [x] **Task 3.1: Asset Manager Core**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/asset-pipeline/manager.ts`
+  - [x] Реализовать метод `resolveAssets(assets: AssetRequest[], projectPath: string)`
+  - [x] Определить тип `AssetRequest` с полями: `type`, `name`, `description`, `tags`
+  - [x] Реализовать 3-уровневый fallback: AI → Local → Procedural
+  - [x] **Файлы:** `src/asset-pipeline/manager.ts`, `src/asset-pipeline/types.ts`
+  - [x] **Логирование:** `INFO` для каждого ассета, `DEBUG` для каждого уровня fallback
 
-- [ ] **Task 3.2: Procedural Generation (Level 1 Fallback)**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/asset-pipeline/procedural.ts`
-  - [ ] Реализовать генерацию Babylon.js примитивов: Box, Sphere, Cylinder, Plane
-  - [ ] Реализовать процедурные материалы (цвета, градиенты)
-  - [ ] Реализовать простые паттерны текстур (шахматная доска, полосы)
-  - [ ] Генерировать TypeScript код, который создаёт mesh в runtime
-  - [ ] **Файлы:** `src/asset-pipeline/procedural.ts`
-  - [ ] **Логирование:** `WARN` "Using procedural fallback for asset: {name}", `DEBUG` для параметров генерации
-  - [ ] **Тесты:** `tests/asset-pipeline/procedural.test.ts` - валидация генерируемого кода
-  - [ ] **Зависит от:** Task 3.1
+- [x] **Task 3.2: Procedural Generation (Level 1 Fallback)**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/asset-pipeline/procedural.ts`
+  - [x] Реализовать генерацию Babylon.js примитивов: Box, Sphere, Cylinder, Plane
+  - [x] Реализовать процедурные материалы (цвета, градиенты)
+  - [x] Реализовать простые паттерны текстур (шахматная доска, полосы)
+  - [x] Генерировать TypeScript код, который создаёт mesh в runtime
+  - [x] **Файлы:** `src/asset-pipeline/procedural.ts`
+  - [x] **Логирование:** `WARN` "Using procedural fallback for asset: {name}", `DEBUG` для параметров генерации
+  - [x] **Тесты:** `tests/asset-pipeline/procedural.test.ts` - валидация генерируемого кода
+  - [x] **Зависит от:** Task 3.1
 
-- [ ] **Task 3.3: Local Asset Library (Level 2 Fallback)**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/asset-pipeline/local-library.ts`
-  - [ ] Создать папку `/home/www/yandex-game-html5-factory/assets/library/` с базовыми ассетами
-  - [ ] Добавить простые 3D модели (.glb): куб, сфера, машина, персонаж (CC0 лицензии)
-  - [ ] Добавить текстуры: трава, камень, металл, дерево (512x512 PNG)
-  - [ ] Реализовать поиск по тегам и копирование в проект игры
-  - [ ] **Файлы:** `src/asset-pipeline/local-library.ts`, `assets/library/*`
-  - [ ] **Логирование:** `INFO` "Using local asset: {filename}", `DEBUG` для поиска по тегам
-  - [ ] **Тесты:** `tests/asset-pipeline/local-library.test.ts` - поиск и копирование файлов
-  - [ ] **Зависит от:** Task 3.1
+- [x] **Task 3.3: Local Asset Library (Level 2 Fallback)**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/asset-pipeline/local-library.ts`
+  - [x] Создать папку `/home/www/yandex-game-html5-factory/assets/library/` с базовыми ассетами
+  - [x] Добавить простые 3D модели (.glb): куб, сфера, машина, персонаж (CC0 лицензии)
+  - [x] Добавить текстуры: трава, камень, металл, дерево (512x512 PNG)
+  - [x] Реализовать поиск по тегам и копирование в проект игры
+  - [x] **Файлы:** `src/asset-pipeline/local-library.ts`, `assets/library/*`
+  - [x] **Логирование:** `INFO` "Using local asset: {filename}", `DEBUG` для поиска по тегам
+  - [x] **Тесты:** `tests/asset-pipeline/local-library.test.ts` - поиск и копирование файлов
+  - [x] **Зависит от:** Task 3.1
 
-- [ ] **Task 3.4: AI Asset Generation (Level 3 - Optional)**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/asset-pipeline/ai-generator.ts`
-  - [ ] Реализовать интеграцию с Tripo3D API (для 3D моделей)
-  - [ ] Реализовать интеграцию с DALL-E / Stable Diffusion API (для текстур)
-  - [ ] Добавить graceful degradation: если API недоступен, вернуть `null`
-  - [ ] **Файлы:** `src/asset-pipeline/ai-generator.ts`
-  - [ ] **Логирование:** `INFO` "Requesting AI asset generation", `WARN` если API keys отсутствуют, `ERROR` при сбое API
-  - [ ] **Тесты:** `tests/asset-pipeline/ai-generator.test.ts` - моки API вызовов
-  - [ ] **Зависит от:** Task 3.1
+- [x] **Task 3.4: AI Asset Generation (Level 3 - Optional)**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/asset-pipeline/ai-generator.ts`
+  - [x] Реализовать интеграцию с Tripo3D API (для 3D моделей)
+  - [x] Реализовать интеграцию с xAI / Google image API (для текстур)
+  - [x] Добавить graceful degradation: если API недоступен, вернуть `null`
+  - [x] **Файлы:** `src/asset-pipeline/ai-generator.ts`
+  - [x] **Логирование:** `INFO` "Requesting AI asset generation", `WARN` если API keys отсутствуют, `ERROR` при сбое API
+  - [x] **Тесты:** `tests/asset-pipeline/ai-generator.test.ts` - моки API вызовов
+  - [x] **Зависит от:** Task 3.1
 
 ---
 

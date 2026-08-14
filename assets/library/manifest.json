@@ -1,0 +1,12 @@
+{
+  "assets": [
+    { "path": "models/cube.glb", "type": "3d-model", "tags": ["cube", "box", "crate", "obstacle"], "license": "CC0-1.0" },
+    { "path": "models/sphere.glb", "type": "3d-model", "tags": ["sphere", "orb", "ball", "coin"], "license": "CC0-1.0" },
+    { "path": "models/car.glb", "type": "3d-model", "tags": ["car", "vehicle", "racing"], "license": "CC0-1.0" },
+    { "path": "models/character.glb", "type": "3d-model", "tags": ["character", "human", "player", "enemy"], "license": "CC0-1.0" },
+    { "path": "textures/grass.png", "type": "texture", "tags": ["grass", "ground", "nature"], "license": "CC0-1.0" },
+    { "path": "textures/stone.png", "type": "texture", "tags": ["stone", "rock", "wall"], "license": "CC0-1.0" },
+    { "path": "textures/metal.png", "type": "texture", "tags": ["metal", "vehicle", "industrial"], "license": "CC0-1.0" },
+    { "path": "textures/wood.png", "type": "texture", "tags": ["wood", "crate", "tree"], "license": "CC0-1.0" }
+  ]
+}
