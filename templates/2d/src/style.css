@@ -1,0 +1,36 @@
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #17212b;
+}
+
+body {
+  display: grid;
+  place-items: center;
+  font-family: Arial, sans-serif;
+}
+
+#game-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  image-rendering: auto;
+}
+
+#loading {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: #17212b;
+}
+
+#loading[hidden] {
+  display: none;
+}

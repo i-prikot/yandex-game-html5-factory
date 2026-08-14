@@ -3,15 +3,15 @@
 
 **Ветка:** feature/ai-html5-413f71  
 **Создано:** 2026-08-14  
-**Статус:** В разработке
+**Статус:** Завершено
 
 ---
 
 ## Настройки
 
-- [ ] **Тестирование:** Да (модульные и интеграционные тесты)
-- [ ] **Логирование:** Verbose (подробное DEBUG-логирование для разработки)
-- [ ] **Документация:** Да (обязательная проверка документации при завершении)
+- [x] **Тестирование:** Да (модульные и интеграционные тесты)
+- [x] **Логирование:** Verbose (подробное DEBUG-логирование для разработки)
+- [x] **Документация:** Да (обязательная проверка документации при завершении)
 
 ---
 
@@ -20,18 +20,18 @@
 Создание AI-фабрики для генерации HTML5-игр под платформу Яндекс Игры. Система основана на архитектуре Godogen (визуальная валидация, самовосстановление), адаптированная для работы на слабом железе, с поддержкой offline-режима (без внешних API ключей) и Docker-развертыванием для Windows.
 
 **Ключевые технологии:**
-- [ ] Babylon.js (2D/3D движок)
-- [ ] TypeScript + Vite
-- [ ] Puppeteer (headless-тестирование)
-- [ ] Docker (изоляция окружения)
-- [ ] Yandex Games SDK
+- [x] Canvas 2D + Babylon.js 3D
+- [x] TypeScript + Vite
+- [x] Puppeteer (headless-тестирование)
+- [x] Docker (изоляция окружения)
+- [x] Yandex Games SDK
 
 **Принципы:**
-- [ ] Proof over claims: визуальная валидация через скриншоты
-- [ ] Offline-first: процедурная генерация → локальные ассеты → AI API
-- [ ] Performance budgets: LOW/MEDIUM/HIGH пресеты
-- [ ] Self-repair loop: build → run → capture → analyze → fix
-- [ ] Engine-agnostic core с Babylon.js-реализацией
+- [x] Proof over claims: визуальная валидация через скриншоты
+- [x] Offline-first: опциональный AI API → локальные ассеты → процедурный fallback
+- [x] Performance budgets: LOW/MEDIUM/HIGH пресеты
+- [x] Self-repair loop: build → run → capture → analyze → fix
+- [x] Engine-agnostic core с Canvas 2D и Babylon.js 3D реализациями
 
 ---
 
@@ -186,54 +186,54 @@
 
 **Задачи:**
 
-- [ ] **Task 4.1: Базовый Babylon.js + Vite шаблон**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/templates/babylon-base/`
-  - [ ] Настроить Vite конфигурацию для TypeScript и Babylon.js
-  - [ ] Создать `index.html` с canvas и загрузкой Yandex Games SDK
-  - [ ] Создать `src/main.ts` с инициализацией Babylon.Engine
-  - [ ] Добавить `package.json` с зависимостями: `babylonjs`, `vite`, `typescript`
-  - [ ] **Файлы:** `templates/babylon-base/{vite.config.ts, index.html, src/main.ts, package.json}`
-  - [ ] **Логирование:** `DEBUG` при инициализации шаблона
+- [x] **Task 4.1: Базовый Babylon.js + Vite шаблон**
+  - [x] Создать `/home/www/yandex-game-html5-factory/templates/babylon-base/`
+  - [x] Настроить Vite конфигурацию для TypeScript и Babylon.js
+  - [x] Создать `index.html` с canvas и загрузкой Yandex Games SDK
+  - [x] Создать `src/main.ts` с инициализацией Babylon.Engine
+  - [x] Добавить `package.json` с modular `@babylonjs/core`, `vite`, `typescript`
+  - [x] **Файлы:** `templates/babylon-base/{vite.config.ts, index.html, src/main.ts, package.json}`
+  - [x] **Логирование:** `DEBUG` при инициализации шаблона
 
-- [ ] **Task 4.2: Yandex Games Adapter (Mock + Production)**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/templates/babylon-base/src/yandex/adapter.ts`
-  - [ ] Реализовать методы: `init()`, `showFullscreenAd()`, `showRewardedAd()`, `getPlayer()`
-  - [ ] Добавить Mock-режим для локальной разработки (когда SDK недоступен)
-  - [ ] Логировать все вызовы в консоль браузера
-  - [ ] **Файлы:** `templates/babylon-base/src/yandex/adapter.ts`
-  - [ ] **Логирование:** `WARN` "Yandex SDK not found, using mock mode" при локальной разработке
-  - [ ] **Тесты:** `tests/templates/yandex-adapter.test.ts` - моки SDK вызовов
-  - [ ] **Зависит от:** Task 4.1
+- [x] **Task 4.2: Yandex Games Adapter (Mock + Production)**
+  - [x] Создать `/home/www/yandex-game-html5-factory/templates/babylon-base/src/yandex/adapter.ts`
+  - [x] Реализовать методы: `init()`, `showFullscreenAd()`, `showRewardedAd()`, `getPlayer()`
+  - [x] Добавить Mock-режим для локальной разработки (когда SDK недоступен)
+  - [x] Логировать все вызовы в консоль браузера
+  - [x] **Файлы:** `templates/babylon-base/src/yandex/adapter.ts`
+  - [x] **Логирование:** `WARN` "Yandex SDK not found, using mock mode" при локальной разработке
+  - [x] **Тесты:** `tests/templates/yandex-adapter.test.ts` - моки SDK вызовов
+  - [x] **Зависит от:** Task 4.1
 
-- [ ] **Task 4.3: 2D Game Template**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/templates/2d/` на базе `babylon-base`
-  - [ ] Настроить ортографическую камеру (`BABYLON.Camera.ORTHOGRAPHIC_CAMERA`)
-  - [ ] Добавить `SpriteManager` для спрайтовой графики
-  - [ ] Отключить физический движок (использовать AABB коллизии)
-  - [ ] Создать пример 2D сцены (платформер или аркада)
-  - [ ] **Файлы:** `templates/2d/{src/game2d.ts, src/physics2d.ts}`
-  - [ ] **Логирование:** `INFO` "Initializing 2D scene", `DEBUG` для настроек камеры
-  - [ ] **Зависит от:** Task 4.1
+- [x] **Task 4.3: Native Canvas 2D Game Template**
+  - [x] Создать отдельный `/home/www/yandex-game-html5-factory/templates/2d/` без Babylon.js dependency
+  - [x] Настроить Canvas 2D fixed-resolution rendering с responsive scaling
+  - [x] Добавить пять starting presets: platformer, top-down shooter, clicker, idle, puzzle
+  - [x] Отключить физический движок (использовать AABB коллизии)
+  - [x] Создать пример 2D arcade сцены
+  - [x] **Файлы:** `templates/2d/{src/game2d.ts, src/physics2d.ts}`
+  - [x] **Логирование:** `INFO` "Initializing native Canvas 2D scene", `DEBUG` для render settings
+  - [x] **Зависит от:** Task 4.1
 
-- [ ] **Task 4.4: 3D Game Template**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/templates/3d/` на базе `babylon-base`
-  - [ ] Настроить `ArcRotateCamera` или `UniversalCamera`
-  - [ ] Добавить базовое освещение (`HemisphericLight`, `DirectionalLight`)
-  - [ ] Интегрировать простую физику (CannonJS или AmmoJS)
-  - [ ] Создать пример 3D сцены (раннер или third-person)
-  - [ ] **Файлы:** `templates/3d/{src/game3d.ts, src/physics3d.ts}`
-  - [ ] **Логирование:** `INFO` "Initializing 3D scene", `DEBUG` для настроек камеры и света
-  - [ ] **Зависит от:** Task 4.1
+- [x] **Task 4.4: 3D Game Template**
+  - [x] Создать `/home/www/yandex-game-html5-factory/templates/3d/` как overlay для `babylon-base`
+  - [x] Настроить `ArcRotateCamera`
+  - [x] Добавить базовое освещение (`HemisphericLight`, `DirectionalLight`)
+  - [x] Интегрировать дешёвую kinematic physics и collision вместо тяжёлого обязательного physics runtime
+  - [x] Создать пример 3D endless runner сцены и пять genre presets
+  - [x] **Файлы:** `templates/3d/{src/game3d.ts, src/physics3d.ts}`
+  - [x] **Логирование:** `INFO` "Initializing 3D scene", `DEBUG` для настроек камеры и света
+  - [x] **Зависит от:** Task 4.1
 
-- [ ] **Task 4.5: Scaffolding System**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/scaffold/generator.ts`
-  - [ ] Реализовать копирование шаблона в `output/<game-name>/`
-  - [ ] Реализовать замену плейсхолдеров в файлах (название игры, настройки)
-  - [ ] Запускать `npm install` в сгенерированном проекте
-  - [ ] **Файлы:** `src/scaffold/generator.ts`
-  - [ ] **Логирование:** `INFO` "Scaffolding project: {name}", `DEBUG` для каждого скопированного файла, `WARN` при ошибках npm install
-  - [ ] **Тесты:** `tests/scaffold/generator.test.ts` - проверка копирования и плейсхолдеров
-  - [ ] **Зависит от:** Task 4.1, Task 4.3, Task 4.4
+- [x] **Task 4.5: Scaffolding System**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/scaffold/generator.ts`
+  - [x] Реализовать копирование standalone source project в `projects/<game-name>/`
+  - [x] Реализовать безопасную замену плейсхолдеров в файлах (название игры, настройки)
+  - [x] Запускать `npm install --include=dev` в сгенерированном проекте
+  - [x] **Файлы:** `src/scaffold/generator.ts`
+  - [x] **Логирование:** `INFO` "Scaffolding project: {name}", `DEBUG` для каждого скопированного файла, `WARN` при ошибках npm install
+  - [x] **Тесты:** `tests/scaffold/generator.test.ts` - проверка копирования и плейсхолдеров
+  - [x] **Зависит от:** Task 4.1, Task 4.3, Task 4.4
 
 ---
 
@@ -241,36 +241,36 @@
 
 **Задачи:**
 
-- [ ] **Task 5.1: Performance Budgets Definition**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/performance/budgets.ts`
-  - [ ] Определить пресеты LOW, MEDIUM, HIGH с параметрами:
-    - [ ] `targetFPS`, `hardwareScalingLevel`, `shadowsEnabled`, `shadowMapSize`
-    - [ ] `postProcessing`, `maxParticles`, `textureSize`, `useLOD`
-  - [ ] Экспортировать константы для использования в коде игры
-  - [ ] **Файлы:** `src/performance/budgets.ts`
-  - [ ] **Логирование:** `DEBUG` для определения пресетов
+- [x] **Task 5.1: Performance Budgets Definition**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/performance/budgets.ts`
+  - [x] Определить пресеты LOW, MEDIUM, HIGH с параметрами:
+    - [x] `targetFPS`, `hardwareScalingLevel`, `shadowsEnabled`, `shadowMapSize`
+    - [x] `postProcessing`, `maxParticles`, `textureSize`, `useLOD`
+  - [x] Экспортировать константы для использования в коде игры
+  - [x] **Файлы:** `src/performance/budgets.ts`
+  - [x] **Логирование:** `DEBUG` для определения пресетов
 
-- [ ] **Task 5.2: Performance Injector**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/performance/injector.ts`
-  - [ ] Реализовать метод `applyBudget(code: string, preset: string): string`
-  - [ ] Внедрять в TypeScript код игры:
-    - [ ] `engine.setHardwareScalingLevel(value)`
-    - [ ] Отключение теней при LOW preset
-    - [ ] Ограничение частиц и текстур
-  - [ ] **Файлы:** `src/performance/injector.ts`
-  - [ ] **Логирование:** `INFO` "Applying {preset} performance budget", `DEBUG` для каждой модификации кода
-  - [ ] **Тесты:** `tests/performance/injector.test.ts` - проверка трансформации кода
-  - [ ] **Зависит от:** Task 5.1
+- [x] **Task 5.2: Performance Injector**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/performance/injector.ts`
+  - [x] Реализовать метод `applyBudget(code: string, preset: string): string`
+  - [x] Внедрять в TypeScript код игры:
+    - [x] `engine.setHardwareScalingLevel(value)`
+    - [x] Отключение теней при LOW preset
+    - [x] Ограничение частиц и текстур
+  - [x] **Файлы:** `src/performance/injector.ts`
+  - [x] **Логирование:** `INFO` "Applying {preset} performance budget", `DEBUG` для каждой модификации кода
+  - [x] **Тесты:** `tests/performance/injector.test.ts` - проверка трансформации кода
+  - [x] **Зависит от:** Task 5.1
 
-- [ ] **Task 5.3: Runtime Performance Monitor**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/templates/babylon-base/src/performance/monitor.ts`
-  - [ ] Реализовать FPS-счётчик и отображение на canvas
-  - [ ] Добавить автоматическое снижение качества при просадках FPS
-  - [ ] Логировать метрики производительности в консоль
-  - [ ] **Файлы:** `templates/babylon-base/src/performance/monitor.ts`
-  - [ ] **Логирование:** `WARN` "FPS drop detected: {fps}", `INFO` "Auto-adjusting quality to {level}"
-  - [ ] **Тесты:** `tests/performance/monitor.test.ts` - симуляция FPS drops
-  - [ ] **Зависит от:** Task 5.1
+- [x] **Task 5.3: Runtime Performance Monitor**
+  - [x] Создать `/home/www/yandex-game-html5-factory/templates/babylon-base/src/performance/monitor.ts`
+  - [x] Реализовать FPS-счётчик и отображение на canvas
+  - [x] Добавить автоматическое снижение качества при просадках FPS
+  - [x] Логировать метрики производительности в консоль
+  - [x] **Файлы:** `templates/babylon-base/src/performance/monitor.ts`
+  - [x] **Логирование:** `WARN` "FPS drop detected: {fps}", `INFO` "Auto-adjusting quality to {level}"
+  - [x] **Тесты:** `tests/performance/monitor.test.ts` - симуляция FPS drops
+  - [x] **Зависит от:** Task 5.1
 
 ---
 
@@ -278,37 +278,37 @@
 
 **Задачи:**
 
-- [ ] **Task 6.1: Browser Tester Core**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/browser/tester.ts`
-  - [ ] Реализовать запуск Vite dev server программно
-  - [ ] Реализовать открытие Puppeteer headless браузера
-  - [ ] Захват console.error и pageerror событий
-  - [ ] Создание base64 скриншота после рендера
-  - [ ] Автоматическое закрытие браузера и Vite после теста
-  - [ ] **Файлы:** `src/browser/tester.ts`
-  - [ ] **Логирование:** `INFO` "Starting browser test for {project}", `DEBUG` для каждого шага, `ERROR` для сбоев Puppeteer
-  - [ ] **Тесты:** `tests/browser/tester.test.ts` - моки Puppeteer
+- [x] **Task 6.1: Browser Tester Core**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/browser/tester.ts`
+  - [x] Реализовать запуск Vite dev server программно
+  - [x] Реализовать открытие Puppeteer headless браузера
+  - [x] Захват console.error и pageerror событий
+  - [x] Создание base64 скриншота после рендера
+  - [x] Автоматическое закрытие браузера и Vite после теста
+  - [x] **Файлы:** `src/browser/tester.ts`
+  - [x] **Логирование:** `INFO` "Starting browser test for {project}", `DEBUG` для каждого шага, `ERROR` для сбоев Puppeteer
+  - [x] **Тесты:** `tests/browser/tester.test.ts` - моки Puppeteer
 
-- [ ] **Task 6.2: Visual Reviewer (Vision LLM Analysis)**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/browser/reviewer.ts`
-  - [ ] Реализовать анализ скриншота через Vision LLM (Claude Code с vision)
-  - [ ] Проверять: пустой экран, чёрный экран, видимость объектов, UI элементы
-  - [ ] Возвращать структурированный отчёт: `{ passed: boolean, issues: string[], suggestions: string[] }`
-  - [ ] **Файлы:** `src/browser/reviewer.ts`
-  - [ ] **Логирование:** `INFO` "Analyzing screenshot", `WARN` для каждой найденной проблемы, `DEBUG` для vision API responses
-  - [ ] **Тесты:** `tests/browser/reviewer.test.ts` - моки vision API
-  - [ ] **Зависит от:** Task 6.1
+- [x] **Task 6.2: Visual Reviewer (Vision LLM Analysis)**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/browser/reviewer.ts`
+  - [x] Реализовать анализ скриншота через Vision LLM (Claude Code с vision)
+  - [x] Проверять: пустой экран, чёрный экран, видимость объектов, UI элементы
+  - [x] Возвращать структурированный отчёт: `{ passed: boolean, issues: string[], suggestions: string[] }`
+  - [x] **Файлы:** `src/browser/reviewer.ts`
+  - [x] **Логирование:** `INFO` "Analyzing screenshot", `WARN` для каждой найденной проблемы, `DEBUG` для vision API responses
+  - [x] **Тесты:** `tests/browser/reviewer.test.ts` - моки vision API
+  - [x] **Зависит от:** Task 6.1
 
-- [ ] **Task 6.3: Self-Repair Loop Orchestrator**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/browser/repair-loop.ts`
-  - [ ] Реализовать цикл: build → run → capture → analyze → fix (max 5 итераций)
-  - [ ] При каждой ошибке вызывать AI provider для генерации исправления
-  - [ ] Применять патч к коду и повторять тест
-  - [ ] Логировать прогресс каждой итерации
-  - [ ] **Файлы:** `src/browser/repair-loop.ts`
-  - [ ] **Логирование:** `INFO` "Repair loop iteration {n}/5", `DEBUG` для патчей кода, `ERROR` если цикл исчерпан
-  - [ ] **Тесты:** `tests/browser/repair-loop.test.ts` - симуляция ошибок и исправлений
-  - [ ] **Зависит от:** Task 6.1, Task 6.2
+- [x] **Task 6.3: Self-Repair Loop Orchestrator**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/browser/repair-loop.ts`
+  - [x] Реализовать цикл: build → run → capture → analyze → fix (max 5 итераций)
+  - [x] При каждой ошибке вызывать AI provider для генерации исправления
+  - [x] Применять патч к коду и повторять тест
+  - [x] Логировать прогресс каждой итерации
+  - [x] **Файлы:** `src/browser/repair-loop.ts`
+  - [x] **Логирование:** `INFO` "Repair loop iteration {n}/5", `DEBUG` для патчей кода, `ERROR` если цикл исчерпан
+  - [x] **Тесты:** `tests/browser/repair-loop.test.ts` - симуляция ошибок и исправлений
+  - [x] **Зависит от:** Task 6.1, Task 6.2
 
 ---
 
@@ -316,61 +316,61 @@
 
 **Задачи:**
 
-- [ ] **Task 7.1: Game Planner Agent**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/agents/game-planner.ts`
-  - [ ] Реализовать метод `analyze(prompt: string, quality: string)` через AI provider
-  - [ ] Возвращать структурированный план:
-    - [ ] `type: '2d' | '3d'`
-    - [ ] `genre: string`
-    - [ ] `mechanics: string[]`
-    - [ ] `assets: AssetRequest[]`
-    - [ ] `quality: 'LOW' | 'MEDIUM' | 'HIGH'`
-  - [ ] **Файлы:** `src/agents/game-planner.ts`
-  - [ ] **Логирование:** `INFO` "Planning game from prompt", `DEBUG` для распарсенного плана
-  - [ ] **Тесты:** `tests/agents/game-planner.test.ts` - валидация структуры плана
+- [x] **Task 7.1: Game Planner Agent**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/agents/game-planner.ts`
+  - [x] Реализовать метод `analyze(prompt: string, quality: string)` через AI provider
+  - [x] Возвращать структурированный план:
+    - [x] `type: '2d' | '3d'`
+    - [x] `genre: string`
+    - [x] `mechanics: string[]`
+    - [x] `assets: AssetRequest[]`
+    - [x] `quality: 'LOW' | 'MEDIUM' | 'HIGH'`
+  - [x] **Файлы:** `src/agents/game-planner.ts`
+  - [x] **Логирование:** `INFO` "Planning game from prompt", `DEBUG` для распарсенного плана
+  - [x] **Тесты:** `tests/agents/game-planner.test.ts` - валидация структуры плана
 
-- [ ] **Task 7.2: Game Architect Agent**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/agents/game-architect.ts`
-  - [ ] Реализовать метод `scaffold(plan: GamePlan)` через scaffolding system
-  - [ ] Выбор правильного шаблона (2D / 3D)
-  - [ ] Применение performance budget
-  - [ ] Возвращать путь к созданному проекту
-  - [ ] **Файлы:** `src/agents/game-architect.ts`
-  - [ ] **Логирование:** `INFO` "Scaffolding game architecture", `DEBUG` для выбора шаблона
-  - [ ] **Тесты:** `tests/agents/game-architect.test.ts` - проверка создания проекта
-  - [ ] **Зависит от:** Task 7.1, Task 4.5
+- [x] **Task 7.2: Game Architect Agent**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/agents/game-architect.ts`
+  - [x] Реализовать метод `scaffold(plan: GamePlan)` через scaffolding system
+  - [x] Выбор правильного шаблона (2D / 3D)
+  - [x] Применение performance budget
+  - [x] Возвращать путь к созданному проекту
+  - [x] **Файлы:** `src/agents/game-architect.ts`
+  - [x] **Логирование:** `INFO` "Scaffolding game architecture", `DEBUG` для выбора шаблона
+  - [x] **Тесты:** `tests/agents/game-architect.test.ts` - проверка создания проекта
+  - [x] **Зависит от:** Task 7.1, Task 4.5
 
-- [ ] **Task 7.3: Gameplay Developer Agent**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/agents/gameplay-developer.ts`
-  - [ ] Реализовать метод `writeCode(plan: GamePlan, projectPath: string)` через AI provider
-  - [ ] Генерация игровой логики, физики, управления
-  - [ ] Внедрение кода в `src/game.ts` сгенерированного проекта
-  - [ ] **Файлы:** `src/agents/gameplay-developer.ts`
-  - [ ] **Логирование:** `INFO` "Generating gameplay code", `DEBUG` для каждого модуля (physics, controls, logic)
-  - [ ] **Тесты:** `tests/agents/gameplay-developer.test.ts` - моки AI provider
-  - [ ] **Зависит от:** Task 7.2
+- [x] **Task 7.3: Gameplay Developer Agent**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/agents/gameplay-developer.ts`
+  - [x] Реализовать метод `writeCode(plan: GamePlan, projectPath: string)` через AI provider
+  - [x] Генерация игровой логики, физики, управления
+  - [x] Внедрение кода в `src/game.ts` сгенерированного проекта
+  - [x] **Файлы:** `src/agents/gameplay-developer.ts`
+  - [x] **Логирование:** `INFO` "Generating gameplay code", `DEBUG` для каждого модуля (physics, controls, logic)
+  - [x] **Тесты:** `tests/agents/gameplay-developer.test.ts` - моки AI provider
+  - [x] **Зависит от:** Task 7.2
 
-- [ ] **Task 7.4: Bug Fixer Agent**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/agents/bug-fixer.ts`
-  - [ ] Реализовать метод `fix(projectPath: string, issues: string[], consoleErrors: string[])`
-  - [ ] Анализ ошибок и генерация патчей через AI provider
-  - [ ] Применение патчей к коду игры
-  - [ ] **Файлы:** `src/agents/bug-fixer.ts`
-  - [ ] **Логирование:** `INFO` "Fixing bugs: {issues}", `DEBUG` для генерируемых патчей, `ERROR` если исправление не удалось
-  - [ ] **Тесты:** `tests/agents/bug-fixer.test.ts` - симуляция багов и исправлений
-  - [ ] **Зависит от:** Task 7.3
+- [x] **Task 7.4: Bug Fixer Agent**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/agents/bug-fixer.ts`
+  - [x] Реализовать метод `fix(projectPath: string, issues: string[], consoleErrors: string[])`
+  - [x] Анализ ошибок и генерация патчей через AI provider
+  - [x] Применение патчей к коду игры
+  - [x] **Файлы:** `src/agents/bug-fixer.ts`
+  - [x] **Логирование:** `INFO` "Fixing bugs: {issues}", `DEBUG` для генерируемых патчей, `ERROR` если исправление не удалось
+  - [x] **Тесты:** `tests/agents/bug-fixer.test.ts` - симуляция багов и исправлений
+  - [x] **Зависит от:** Task 7.3
 
-- [ ] **Task 7.5: Build Manager Agent**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/agents/build-manager.ts`
-  - [ ] Реализовать метод `buildForYandex(projectPath: string)`
-  - [ ] Запуск `npm run build` в проекте игры
-  - [ ] Проверка подключения Yandex Games SDK в production сборке
-  - [ ] Создание ZIP-архива из `dist/` папки
-  - [ ] Перемещение архива в `output/packages/<game-name>.zip`
-  - [ ] **Файлы:** `src/agents/build-manager.ts`
-  - [ ] **Логирование:** `INFO` "Building production package", `DEBUG` для каждого шага сборки, `ERROR` при сбое build
-  - [ ] **Тесты:** `tests/agents/build-manager.test.ts` - проверка создания ZIP
-  - [ ] **Зависит от:** Task 7.4
+- [x] **Task 7.5: Build Manager Agent**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/agents/build-manager.ts`
+  - [x] Реализовать метод `buildForYandex(projectPath: string)`
+  - [x] Запуск `npm run build` в проекте игры
+  - [x] Проверка подключения Yandex Games SDK в production сборке
+  - [x] Создание ZIP-архива из `dist/` папки
+  - [x] Перемещение архива в `output/packages/<game-name>.zip`
+  - [x] **Файлы:** `src/agents/build-manager.ts`
+  - [x] **Логирование:** `INFO` "Building production package", `DEBUG` для каждого шага сборки, `ERROR` при сбое build
+  - [x] **Тесты:** `tests/agents/build-manager.test.ts` - проверка создания ZIP
+  - [x] **Зависит от:** Task 7.4
 
 ---
 
@@ -378,28 +378,28 @@
 
 **Задачи:**
 
-- [ ] **Task 8.1: Factory Pipeline Orchestrator**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/src/pipeline/orchestrator.ts`
-  - [ ] Реализовать метод `run(prompt: string, quality: string, provider: string)`
-  - [ ] Последовательный вызов всех агентов:
+- [x] **Task 8.1: Factory Pipeline Orchestrator**
+  - [x] Создать `/home/www/yandex-game-html5-factory/src/pipeline/orchestrator.ts`
+  - [x] Реализовать метод `run(prompt: string, quality: string, provider: string)`
+  - [x] Последовательный вызов всех агентов:
     1. GamePlanner → GameArchitect → AssetManager
     2. GameplayDeveloper → BrowserTester
     3. Self-repair loop (max 5 итераций)
     4. BuildManager → ZIP package
-  - [ ] Обработка ошибок на каждом этапе с откатом
-  - [ ] **Файлы:** `src/pipeline/orchestrator.ts`
-  - [ ] **Логирование:** `INFO` для каждого этапа, `DEBUG` для передачи контекста между агентами, `ERROR` для критических сбоев
-  - [ ] **Тесты:** `tests/pipeline/orchestrator.test.ts` - интеграционный тест полного цикла (моки агентов)
-  - [ ] **Зависит от:** Task 7.1, Task 7.2, Task 7.3, Task 7.4, Task 7.5, Task 6.3
+  - [x] Обработка ошибок на каждом этапе с откатом
+  - [x] **Файлы:** `src/pipeline/orchestrator.ts`
+  - [x] **Логирование:** `INFO` для каждого этапа, `DEBUG` для передачи контекста между агентами, `ERROR` для критических сбоев
+  - [x] **Тесты:** `tests/pipeline/orchestrator.test.ts` - интеграционный тест полного цикла (моки агентов)
+  - [x] **Зависит от:** Task 7.1, Task 7.2, Task 7.3, Task 7.4, Task 7.5, Task 6.3
 
-- [ ] **Task 8.2: Интеграция Orchestrator в CLI**
-  - [ ] Обновить `/home/www/yandex-game-html5-factory/src/cli/index.ts`
-  - [ ] После получения пользовательских input вызывать `FactoryPipeline.run()`
-  - [ ] Показывать прогресс-бар и статус каждого этапа
-  - [ ] Обработка ошибок с user-friendly сообщениями
-  - [ ] **Файлы:** `src/cli/index.ts` (обновить)
-  - [ ] **Логирование:** `INFO` для прогресса, `ERROR` для ошибок с подсказками пользователю
-  - [ ] **Зависит от:** Task 8.1, Task 1.3
+- [x] **Task 8.2: Интеграция Orchestrator в CLI**
+  - [x] Обновить `/home/www/yandex-game-html5-factory/src/cli/index.ts`
+  - [x] После получения пользовательских input вызывать `FactoryPipeline.run()`
+  - [x] Показывать прогресс-бар и статус каждого этапа
+  - [x] Обработка ошибок с user-friendly сообщениями
+  - [x] **Файлы:** `src/cli/index.ts` (обновить)
+  - [x] **Логирование:** `INFO` для прогресса, `ERROR` для ошибок с подсказками пользователю
+  - [x] **Зависит от:** Task 8.1, Task 1.3
 
 ---
 
@@ -407,60 +407,60 @@
 
 **Задачи:**
 
-- [ ] **Task 9.1: Acceptance Test 1 & 2 - Генерация без API ключей**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/tests/acceptance/no-api-keys.test.ts`
-  - [ ] Очистить все переменные окружения с API ключами
-  - [ ] Запустить генерацию 2D игры через CLI (мок промпт: "Платформер с прыжками")
-  - [ ] Запустить генерацию 3D игры через CLI (мок промпт: "Гонка с препятствиями")
-  - [ ] Проверить:
-    - [ ] Проекты созданы в `output/`
-    - [ ] Использованы процедурные ассеты (логи содержат "Using procedural fallback")
-    - [ ] Игры успешно собираются (`dist/` папка создана)
-    - [ ] ZIP-пакеты созданы
-  - [ ] **Файлы:** `tests/acceptance/no-api-keys.test.ts`
-  - [ ] **Логирование:** `INFO` для каждой проверки, `ERROR` при сбое теста
+- [x] **Task 9.1: Acceptance Test 1 & 2 - Генерация без API ключей**
+  - [x] Создать `/home/www/yandex-game-html5-factory/tests/acceptance/no-api-keys.test.ts`
+  - [x] Очистить все переменные окружения с API ключами
+  - [x] Запустить генерацию 2D игры через CLI (мок промпт: "Платформер с прыжками")
+  - [x] Запустить генерацию 3D игры через CLI (мок промпт: "Гонка с препятствиями")
+  - [x] Проверить:
+    - [x] Проекты созданы в `output/`
+    - [x] Использованы процедурные ассеты (логи содержат "Using procedural fallback")
+    - [x] Игры успешно собираются (`dist/` папка создана)
+    - [x] ZIP-пакеты созданы
+  - [x] **Файлы:** `tests/acceptance/no-api-keys.test.ts`
+  - [x] **Логирование:** `INFO` для каждой проверки, `ERROR` при сбое теста
 
-- [ ] **Task 9.2: Acceptance Test 3 & 4 - Провайдеры AI**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/tests/acceptance/providers.test.ts`
-  - [ ] Запустить генерацию с `AI_PROVIDER=claude` (мок Claude API)
-  - [ ] Запустить генерацию с `AI_PROVIDER=codex` (заглушка Codex)
-  - [ ] Проверить логи использования правильного провайдера
-  - [ ] Проверить успешную генерацию кода
-  - [ ] **Файлы:** `tests/acceptance/providers.test.ts`
-  - [ ] **Логирование:** `INFO` для выбора провайдера, `DEBUG` для вызовов API
+- [x] **Task 9.2: Acceptance Test 3 & 4 - Провайдеры AI**
+  - [x] Создать `/home/www/yandex-game-html5-factory/tests/acceptance/providers.test.ts`
+  - [x] Запустить генерацию с `AI_PROVIDER=claude` (мок Claude API)
+  - [x] Запустить генерацию с `AI_PROVIDER=codex` (заглушка Codex)
+  - [x] Проверить логи использования правильного провайдера
+  - [x] Проверить успешную генерацию кода
+  - [x] **Файлы:** `tests/acceptance/providers.test.ts`
+  - [x] **Логирование:** `INFO` для выбора провайдера, `DEBUG` для вызовов API
 
-- [ ] **Task 9.3: Acceptance Test 5 - LOW Preset Performance**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/tests/acceptance/low-preset.test.ts`
-  - [ ] Запустить генерацию с `GAME_QUALITY=LOW`
-  - [ ] Проверить наличие в коде игры:
-    - [ ] `engine.setHardwareScalingLevel(2)`
-    - [ ] `shadowsEnabled: false`
-    - [ ] `maxParticles: 50`
-  - [ ] Запустить browser test и проверить FPS >= 30
-  - [ ] **Файлы:** `tests/acceptance/low-preset.test.ts`
-  - [ ] **Логирование:** `INFO` для проверки кода, `DEBUG` для FPS метрик
+- [x] **Task 9.3: Acceptance Test 5 - LOW Preset Performance**
+  - [x] Создать `/home/www/yandex-game-html5-factory/tests/acceptance/low-preset.test.ts`
+  - [x] Запустить генерацию с `GAME_QUALITY=LOW`
+  - [x] Проверить наличие в коде игры:
+    - [x] `engine.setHardwareScalingLevel(2)`
+    - [x] `shadowsEnabled: false`
+    - [x] `maxParticles: 50`
+  - [x] Запустить browser test и проверить FPS >= 30
+  - [x] **Файлы:** `tests/acceptance/low-preset.test.ts`
+  - [x] **Логирование:** `INFO` для проверки кода, `DEBUG` для FPS метрик
 
-- [ ] **Task 9.4: Acceptance Test 6 - Self-Repair Loop**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/tests/acceptance/self-repair.test.ts`
-  - [ ] Запустить генерацию с намеренной инъекцией ошибки (камера вне сцены)
-  - [ ] Проверить что:
-    - [ ] Первый тест провален (чёрный экран в логах)
-    - [ ] BugFixer вызван
-    - [ ] Повторный тест успешен
-    - [ ] Количество итераций <= 5
-  - [ ] **Файлы:** `tests/acceptance/self-repair.test.ts`
-  - [ ] **Логирование:** `INFO` для каждой итерации repair loop, `DEBUG` для патчей
+- [x] **Task 9.4: Acceptance Test 6 - Self-Repair Loop**
+  - [x] Создать `/home/www/yandex-game-html5-factory/tests/acceptance/self-repair.test.ts`
+  - [x] Запустить генерацию с намеренной инъекцией ошибки (камера вне сцены)
+  - [x] Проверить что:
+    - [x] Первый тест провален (чёрный экран в логах)
+    - [x] BugFixer вызван
+    - [x] Повторный тест успешен
+    - [x] Количество итераций <= 5
+  - [x] **Файлы:** `tests/acceptance/self-repair.test.ts`
+  - [x] **Логирование:** `INFO` для каждой итерации repair loop, `DEBUG` для патчей
 
-- [ ] **Task 9.5: Acceptance Test 7 - Yandex Production Package**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/tests/acceptance/yandex-package.test.ts`
-  - [ ] Запустить полную генерацию игры
-  - [ ] Проверить что:
-    - [ ] ZIP-архив создан в `output/packages/`
-    - [ ] Архив содержит `index.html` с `<script src="https://yandex.ru/games/sdk/v2"></script>`
-    - [ ] `dist/` содержит минифицированные JS/CSS файлы
-    - [ ] Yandex adapter присутствует в коде
-  - [ ] **Файлы:** `tests/acceptance/yandex-package.test.ts`
-  - [ ] **Логирование:** `INFO` для проверки архива, `DEBUG` для содержимого файлов
+- [x] **Task 9.5: Acceptance Test 7 - Yandex Production Package**
+  - [x] Создать `/home/www/yandex-game-html5-factory/tests/acceptance/yandex-package.test.ts`
+  - [x] Запустить полную генерацию игры
+  - [x] Проверить что:
+    - [x] ZIP-архив создан в `output/packages/`
+    - [x] Архив содержит `index.html` с `<script src="https://yandex.ru/games/sdk/v2"></script>`
+    - [x] `dist/` содержит минифицированные JS/CSS файлы
+    - [x] Yandex adapter присутствует в коде
+  - [x] **Файлы:** `tests/acceptance/yandex-package.test.ts`
+  - [x] **Логирование:** `INFO` для проверки архива, `DEBUG` для содержимого файлов
 
 ---
 
@@ -468,53 +468,53 @@
 
 **Задачи:**
 
-- [ ] **Task 10.1: README.md - User Guide**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/README.md`
-  - [ ] Секции:
-    - [ ] Описание проекта и возможности
-    - [ ] Быстрый старт (запуск через Docker)
-    - [ ] Системные требования
-    - [ ] Структура проекта
-    - [ ] Конфигурация (переменные окружения)
-    - [ ] FAQ и troubleshooting
-  - [ ] **Файлы:** `README.md`
-  - [ ] **Логирование:** N/A
+- [x] **Task 10.1: README.md - User Guide**
+  - [x] Создать `/home/www/yandex-game-html5-factory/README.md`
+  - [x] Секции:
+    - [x] Описание проекта и возможности
+    - [x] Быстрый старт (запуск через Docker)
+    - [x] Системные требования
+    - [x] Структура проекта
+    - [x] Конфигурация (переменные окружения)
+    - [x] FAQ и troubleshooting
+  - [x] **Файлы:** `README.md`
+  - [x] **Логирование:** N/A
 
-- [ ] **Task 10.2: API Documentation**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/docs/api.md`
-  - [ ] Документировать публичные методы всех агентов
-  - [ ] Документировать интерфейсы AI Providers
-  - [ ] Документировать Asset Pipeline API
-  - [ ] Примеры кода для кастомизации
-  - [ ] **Файлы:** `docs/api.md`
-  - [ ] **Логирование:** N/A
+- [x] **Task 10.2: API Documentation**
+  - [x] Создать `/home/www/yandex-game-html5-factory/docs/api.md`
+  - [x] Документировать публичные методы всех агентов
+  - [x] Документировать интерфейсы AI Providers
+  - [x] Документировать Asset Pipeline API
+  - [x] Примеры кода для кастомизации
+  - [x] **Файлы:** `docs/api.md`
+  - [x] **Логирование:** N/A
 
-- [ ] **Task 10.3: Architecture Deep Dive**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/docs/architecture-deep-dive.md`
-  - [ ] Диаграммы компонентов (текстовые ASCII или mermaid)
-  - [ ] Подробное описание каждой фазы pipeline
-  - [ ] Объяснение self-repair loop механики
-  - [ ] Сравнение с оригинальным Godogen
-  - [ ] **Файлы:** `docs/architecture-deep-dive.md`
-  - [ ] **Логирование:** N/A
+- [x] **Task 10.3: Architecture Deep Dive**
+  - [x] Создать `/home/www/yandex-game-html5-factory/docs/architecture-deep-dive.md`
+  - [x] Диаграммы компонентов (текстовые ASCII или mermaid)
+  - [x] Подробное описание каждой фазы pipeline
+  - [x] Объяснение self-repair loop механики
+  - [x] Сравнение с оригинальным Godogen
+  - [x] **Файлы:** `docs/architecture-deep-dive.md`
+  - [x] **Логирование:** N/A
 
-- [ ] **Task 10.4: Game Templates Guide**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/docs/templates-guide.md`
-  - [ ] Описание структуры базового шаблона
-  - [ ] Как создавать кастомные шаблоны
-  - [ ] Особенности 2D vs 3D шаблонов
-  - [ ] Интеграция Yandex SDK в шаблонах
-  - [ ] **Файлы:** `docs/templates-guide.md`
-  - [ ] **Логирование:** N/A
+- [x] **Task 10.4: Game Templates Guide**
+  - [x] Создать `/home/www/yandex-game-html5-factory/docs/templates-guide.md`
+  - [x] Описание структуры базового шаблона
+  - [x] Как создавать кастомные шаблоны
+  - [x] Особенности 2D vs 3D шаблонов
+  - [x] Интеграция Yandex SDK в шаблонах
+  - [x] **Файлы:** `docs/templates-guide.md`
+  - [x] **Логирование:** N/A
 
-- [ ] **Task 10.5: Performance Optimization Guide**
-  - [ ] Создать `/home/www/yandex-game-html5-factory/docs/performance-guide.md`
-  - [ ] Объяснение Performance Budgets
-  - [ ] Как работает runtime monitoring
-  - [ ] Best practices для слабого железа
-  - [ ] Профилирование и отладка FPS issues
-  - [ ] **Файлы:** `docs/performance-guide.md`
-  - [ ] **Логирование:** N/A
+- [x] **Task 10.5: Performance Optimization Guide**
+  - [x] Создать `/home/www/yandex-game-html5-factory/docs/performance-guide.md`
+  - [x] Объяснение Performance Budgets
+  - [x] Как работает runtime monitoring
+  - [x] Best practices для слабого железа
+  - [x] Профилирование и отладка FPS issues
+  - [x] **Файлы:** `docs/performance-guide.md`
+  - [x] **Логирование:** N/A
 
 ---
 
@@ -553,9 +553,9 @@
 
 ## Примечания
 
-- [ ] **Архитектурные решения основаны на ARCHITECTURE.md**, который содержит детальный анализ Godogen и адаптации для Yandex Games
-- [ ] **Offline-first подход критичен**: фабрика должна работать без единого API ключа
-- [ ] **Визуальная валидация обязательна**: успешный build != рабочая игра
-- [ ] **Performance budgets не опциональны**: игры должны работать на слабом железе
-- [ ] **Docker изолирует окружение**: пользователю не нужно ничего устанавливать вручную
-- [ ] **2D != 3D с ограничениями**: отдельные оптимизированные шаблоны и рендер-пути
+- [x] **Архитектурные решения основаны на ARCHITECTURE.md**, который содержит детальный анализ Godogen и адаптации для Yandex Games
+- [x] **Offline-first подход критичен**: фабрика должна работать без единого API ключа
+- [x] **Визуальная валидация обязательна**: успешный build != рабочая игра
+- [x] **Performance budgets не опциональны**: игры должны работать на слабом железе
+- [x] **Docker изолирует окружение**: пользователю не нужно ничего устанавливать вручную
+- [x] **2D != 3D с ограничениями**: отдельные оптимизированные шаблоны и рендер-пути

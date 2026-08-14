@@ -1,3 +1,5 @@
+[← Performance Guide](performance-guide.md) · [Back to README](../README.md) · [Yandex Adaptations →](yandex-adaptations.md)
+
 # Godogen architecture analysis
 
 ## Scope and source revision
@@ -132,10 +134,11 @@ and process termination explicitly.
 
 ### Docker and GPU fallback
 
-Use Chromium from the image and launch with sandbox-compatible flags. Probe the
-actual WebGL renderer. Try hardware acceleration when available, then fall back
-to a compatibility launch using software WebGL instead of aborting. Capture
-quality and timeouts must account for slower software rendering.
+Use Chromium from the image and launch with sandbox-compatible flags. The MVP
+uses software WebGL for reproducible CPU-only validation instead of assuming a
+host GPU. A future accelerated profile must probe the actual renderer and fall
+back to this compatibility launch rather than aborting. Capture quality and
+timeouts must account for slower software rendering.
 
 ### Yandex Games
 
@@ -181,3 +184,9 @@ an application framework to fork. The factory therefore needs an engine-agnostic
 orchestrator with explicit roles, provider adapters, project scaffolding, asset
 fallbacks, browser evidence, deterministic validation, bounded self-repair,
 performance budgets, Yandex packaging, and durable per-run artifacts.
+
+## See Also
+
+- [Architecture Deep Dive](architecture-deep-dive.md) — implemented component boundaries and data flow
+- [Yandex Adaptations](yandex-adaptations.md) — platform-specific decisions derived from the research
+- [Performance Guide](performance-guide.md) — current low-end limits and runtime behavior

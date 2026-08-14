@@ -1,3 +1,5 @@
+[← Godogen Analysis](godogen-analysis.md) · [Back to README](../README.md)
+
 # Yandex Games Factory adaptations
 
 ## Product boundary
@@ -84,16 +86,16 @@ cannot fit its target preset must reduce scope before implementation.
 | --- | ---: | ---: | ---: |
 | target FPS | 30 | 60 | 60 |
 | hardware scaling level | 2.0 | 1.25 | 1.0 |
-| max draw calls | 80 | 180 | 350 |
+| max draw calls | 100 | 250 | 500 |
 | max visible triangles | 75,000 | 250,000 | 750,000 |
-| max texture memory | 64 MiB | 160 MiB | 384 MiB |
+| max texture memory | 64 MiB | 192 MiB | 512 MiB |
 | max texture edge | 512 px | 1024 px | 2048 px |
-| max active meshes | 100 | 300 | 700 |
-| max particles | 50 | 250 | 1,000 |
-| max dynamic lights | 1 | 3 | 6 |
-| max shadow casters | 0 | 8 | 24 |
-| render distance multiplier | 0.55 | 0.8 | 1.0 |
-| physics frequency | 30 Hz | 60 Hz | 60 Hz |
+| max active meshes | 150 | 400 | 1,000 |
+| max particles | 50 | 200 | 1,000 |
+| max dynamic lights | 2 | 4 | 8 |
+| max shadow casters | 0 | 12 | 40 |
+| render distance | 60 | 120 | 240 |
+| max NPCs | 8 | 24 | 64 |
 | post-processing | off | off | optional |
 
 For Canvas 2D the same presets constrain DPR, entity count, particles, update
@@ -101,26 +103,27 @@ frequency, and backing canvas resolution; they do not initialize Babylon.js.
 
 ## Runtime quality selection
 
-`AUTO` begins with a conservative estimate based on WebGL availability, mobile
-status, device memory, logical CPU count, screen pixel count, device pixel
-ratio, renderer string, and a short frame sample. Explicit LOW/MEDIUM/HIGH is
-respected unless required WebGL capabilities are missing.
+`AUTO` begins with a conservative estimate based on WebGL 2 availability,
+mobile status, device memory, logical CPU count, and device pixel ratio.
+Explicit LOW/MEDIUM/HIGH is respected at startup.
 
-The runtime monitor uses hysteresis to avoid quality flapping:
+The runtime monitor samples every 30 frames and avoids quality flapping:
 
-- degrade after sustained FPS below 85% of target;
-- wait at least 10 seconds between changes;
-- upgrade only after sustained headroom and never above the requested cap;
-- apply render scale first, then particles/distance, then optional effects;
-- emit a structured `factory:metrics` snapshot for browser validation.
+- degrade after two consecutive samples below 80% of target;
+- move down only one level at a time and never below LOW;
+- apply hardware scaling immediately;
+- let gameplay reduce particles, distance, or effects through the
+  `onQualityChanged` callback;
+- emit scalar values through `window.__GAME_METRICS__` for browser validation.
 
 ## Browser evidence and repair
 
-Each test run produces a JSON artifact with URL, readiness, browser errors,
-console errors, failed requests, renderer, viewport, screenshot path, pixel
-statistics, and runtime metrics. Deterministic checks detect blank/near-solid
-frames and missing UI even without a vision-capable model. A provider can add a
-semantic review, but cannot waive structural failures.
+Each test run returns URL, console/page errors, failed requests, screenshot
+path, runtime metrics, and duration. The screenshot is retained under
+`.factory/evidence/`; pipeline status is written to `.factory/pipeline-result.json`.
+Deterministic pixel checks detect blank, black, and near-solid frames even
+without a vision-capable model. A provider can add a semantic review, but
+cannot waive structural failures.
 
 Repair is bounded to five iterations:
 
@@ -136,8 +139,8 @@ successful build with a warning.
 - Docker Desktop is the only mandatory development prerequisite on Windows.
 - Node.js, Chromium, zip utilities, and fonts live in the image.
 - Bind mounts expose `projects/`, `output/`, and evidence to the host.
-- Chromium first attempts normal headless WebGL and falls back to software
-  compatibility mode; NVIDIA is never assumed.
+- Chromium uses software WebGL compatibility mode for reproducible CPU-only
+  validation; NVIDIA is never assumed.
 - `start.bat` starts the interactive factory and `build.bat` builds a named
   project/package.
 - Child processes are terminated in `finally` blocks so Windows-mounted project
@@ -152,3 +155,9 @@ successful build with a warning.
 - Do not copy `.env`, factory logs, screenshots, prompts, or source-generation
   metadata into the production game archive.
 - Validate archives from their extracted file list before release.
+
+## See Also
+
+- [Architecture Deep Dive](architecture-deep-dive.md) — implemented pipeline and security boundaries
+- [Performance Guide](performance-guide.md) — exact current budgets and profiling workflow
+- [Godogen Analysis](godogen-analysis.md) — upstream mechanisms considered for adaptation
