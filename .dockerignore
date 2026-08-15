@@ -2,9 +2,17 @@
 .research
 .env
 node_modules
+**/node_modules
 dist
+**/dist
 projects
 output
 screenshots
 coverage
+**/coverage
+**/.vite
 *.log
+.claude
+.codex
+.opencode
+.ai-factory

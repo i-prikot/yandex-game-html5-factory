@@ -79,6 +79,7 @@
   - [x] Настроить переменные `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true` и `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium`
   - [x] Создать `docker-compose.yml` с монтированием volumes и портами (5173 для Vite)
   - [x] Создать `start.bat` для запуска под Windows одной командой
+  - [x] **Rework 2026-08-15:** исключить вложенные `node_modules` из Docker build context и добавить retry для временных DNS-сбоев `apt-get`
   - [x] **Файлы:** `Dockerfile`, `docker-compose.yml`, `start.bat`
   - [x] **Логирование:** `DEBUG` при установке каждого пакета в Docker
 

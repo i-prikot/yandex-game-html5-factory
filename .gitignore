@@ -10,3 +10,7 @@ output/*
 screenshots/
 coverage/
 *.log
+.claude
+.codex
+.opencode
+.ai-factory.json
