@@ -85,33 +85,33 @@ The timeout occurs in the `gameplay` stage, after planning and scaffolding compl
 
 ### Phase 2: Integrate Phased Generation into GameplayDeveloper
 
-- [ ] **Task 2.1: Refactor GameplayDeveloper to use phases**
-  - [ ] Modify `src/agents/gameplay-developer.ts` to detect game type and select phase sequence
-  - [ ] Replace single `provider.generateCode()` call with `PhaseOrchestrator.executePhases()`
-  - [ ] Accumulate code across phases: start with scaffold template, merge each phase's output
-  - [ ] Add phase manifest: write `.factory/gameplay-phases.json` with phase timings and status
-  - [ ] Preserve existing interface: `writeCode(plan, projectPath)` signature unchanged for compatibility
-  - [ ] **Files:** `src/agents/gameplay-developer.ts` (modify)
-  - [ ] **Logging:** `INFO` log phase transition ("Starting phase 2/5: player-movement"), `DEBUG` log code merge operations
-  - [ ] **Tests:** Integration test: mock provider, verify phases execute in order, check accumulated output
+- [x] **Task 2.1: Refactor GameplayDeveloper to use phases**
+  - [x] Modify `src/agents/gameplay-developer.ts` to detect game type and select phase sequence
+  - [x] Replace single `provider.generateCode()` call with `PhaseOrchestrator.executePhases()`
+  - [x] Accumulate code across phases: start with scaffold template, merge each phase's output
+  - [x] Add phase manifest: write `.factory/gameplay-phases.json` with phase timings and status
+  - [x] Preserve existing interface: `writeCode(plan, projectPath)` signature unchanged for compatibility
+  - [x] **Files:** `src/agents/gameplay-developer.ts` (modify)
+  - [x] **Logging:** `INFO` log phase transition ("Starting phase 2/5: player-movement"), `DEBUG` log code merge operations
+  - [x] **Tests:** Integration test: mock provider, verify phases execute in order, check accumulated output
 
-- [ ] **Task 2.2: Add phase validation checkpoints**
-  - [ ] After each phase, validate TypeScript syntax with `tsc --noEmit` on partial code
-  - [ ] If validation fails, retry phase once with error feedback before failing
-  - [ ] Log validation timing: should be under 5000ms per checkpoint
-  - [ ] Write validation results to `.factory/phase-validation.json`
-  - [ ] **Files:** `src/agents/gameplay-developer.ts` (modify), `src/agents/phase-orchestrator.ts` (modify)
-  - [ ] **Logging:** `INFO` for validation pass, `WARN` for validation failure + retry, `ERROR` for validation exhaustion
-  - [ ] **Tests:** Unit test TypeScript validation logic, test retry on syntax error
+- [x] **Task 2.2: Add phase validation checkpoints**
+  - [x] After each phase, validate TypeScript syntax with `tsc --noEmit` on partial code
+  - [x] If validation fails, retry phase once with error feedback before failing
+  - [x] Log validation timing: should be under 5000ms per checkpoint
+  - [x] Write validation results to `.factory/phase-validation.json`
+  - [x] **Files:** `src/agents/gameplay-developer.ts` (modify), `src/agents/phase-orchestrator.ts` (modify)
+  - [x] **Logging:** `INFO` for validation pass, `WARN` for validation failure + retry, `ERROR` for validation exhaustion
+  - [x] **Tests:** Unit test TypeScript validation logic, test retry on syntax error
 
-- [ ] **Task 2.3: Implement incremental file writing**
-  - [ ] Instead of writing the full game file at the end, write after each phase completes
-  - [ ] Enable hot-reload friendly incremental updates: developer can see progress in real-time
-  - [ ] Create backup before each write: `.factory/backups/{phase-name}-{timestamp}.ts`
-  - [ ] On final phase completion, clean up backups older than 24 hours
-  - [ ] **Files:** `src/agents/gameplay-developer.ts` (modify)
-  - [ ] **Logging:** `DEBUG` log each incremental write, `INFO` log backup cleanup
-  - [ ] **Tests:** Test incremental writes create valid files, test backup creation/cleanup
+- [x] **Task 2.3: Implement incremental file writing**
+  - [x] Instead of writing the full game file at the end, write after each phase completes
+  - [x] Enable hot-reload friendly incremental updates: developer can see progress in real-time
+  - [x] Create backup before each write: `.factory/backups/{phase-name}-{timestamp}.ts`
+  - [x] On final phase completion, clean up backups older than 24 hours
+  - [x] **Files:** `src/agents/gameplay-developer.ts` (modify)
+  - [x] **Logging:** `DEBUG` log each incremental write, `INFO` log backup cleanup
+  - [x] **Tests:** Test incremental writes create valid files, test backup creation/cleanup
 
 **Blocked by:** Task 1.1, Task 1.2, Task 1.3
 
@@ -247,10 +247,10 @@ feat(gameplay): introduce phased code generation system
 ```
 refactor(gameplay): integrate phased generation into GameplayDeveloper
 
-- [ ] Replace single monolithic code generation with phase execution
-- [ ] Add phase validation checkpoints with TypeScript syntax checks
-- [ ] Implement incremental file writing with backups
-- [ ] Preserve backward compatibility
+- [x] Replace single monolithic code generation with phase execution
+- [x] Add phase validation checkpoints with TypeScript syntax checks
+- [x] Implement incremental file writing with backups
+- [x] Preserve backward compatibility
 ```
 
 **Checkpoint 3** (After Phase 3 - Task 3.1, 3.2):

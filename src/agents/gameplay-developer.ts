@@ -1,94 +1,73 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, relative, resolve } from "node:path";
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 
 import { createLogger } from "../core/logger.js";
 import type { IProvider } from "../providers/base.js";
 import type { GamePlan } from "./game-planner.js";
+import { resolveGameplayPhases } from "./gameplay-phases.js";
+import {
+  PhaseOrchestrator,
+  type PhaseExecutionResult,
+  type PhaseTiming,
+} from "./phase-orchestrator.js";
 
 export interface GameplayDevelopmentResult {
   files: string[];
   explanation: string;
+  phaseTimings: PhaseTiming[];
 }
 
 const logger = createLogger("agent-gameplay-developer");
 
-function safeSourcePath(projectPath: string, requestedPath: string): string {
-  const projectRoot = resolve(projectPath);
-  const sourceRoot = resolve(projectRoot, "src");
-  const target = resolve(projectRoot, requestedPath);
-  if (!target.startsWith(`${sourceRoot}/`) || !/\.(?:ts|css)$/u.test(target)) {
-    throw new Error(`Gameplay file must be a TypeScript or CSS file inside src/: ${requestedPath}`);
-  }
-  return target;
-}
-
 export class GameplayDeveloper {
-  public constructor(private readonly provider: IProvider) {}
+  public constructor(
+    private readonly provider: IProvider,
+    private readonly phaseOrchestrator: Pick<PhaseOrchestrator, "executePhases"> = new PhaseOrchestrator(),
+  ) {}
 
   public async writeCode(plan: GamePlan, projectPathInput: string): Promise<GameplayDevelopmentResult> {
     const projectPath = resolve(projectPathInput);
     const targetModule = plan.type === "2d" ? "src/game2d.ts" : "src/game3d.ts";
-    const currentCode = await readFile(resolve(projectPath, targetModule), "utf8");
-    logger.info("Generating gameplay code", {
+    const phases = resolveGameplayPhases(plan.type);
+    logger.info("Generating gameplay code in phases", {
       projectPath,
       type: plan.type,
       genre: plan.genre,
       mechanics: plan.mechanics,
       targetModule,
+      phaseCount: phases.length,
     });
-    const response = await this.provider.generateCode(
-      [
-        `Implement the ${plan.type.toUpperCase()} ${plan.genre} game described below.`,
-        plan.description,
-        `Mechanics: ${plan.mechanics.join(", ")}. Quality: ${plan.quality}.`,
-        `Return complete replacement TypeScript for ${targetModule}; preserve its exported public contract.`,
-        "Use no external runtime service, never include API keys, and stay within the performance budget.",
-        `Current module:\n${currentCode}`,
-      ].join("\n\n"),
-      {
-        projectPath,
-        role: "GameplayDeveloper",
-        gameBrief: plan.description,
-        files: { [targetModule]: currentCode },
-        metadata: { type: plan.type, genre: plan.genre, quality: plan.quality },
-      },
-    );
-    const populatedFiles = response.files.filter((file) => file.content.trim().length > 0);
-    const replacements = populatedFiles.length > 0
-      ? populatedFiles
-      : response.code.trim().length > 0
-        ? [{ path: targetModule, content: response.code }]
-        : [];
-    if (response.files.length > populatedFiles.length) {
-      logger.debug("Ignored empty gameplay file replacements", {
-        ignoredFiles: response.files.length - populatedFiles.length,
-        usableFiles: populatedFiles.length,
-        usedCodeFallback: populatedFiles.length === 0 && replacements.length > 0,
-      });
-    }
-    if (replacements.length === 0) {
-      throw new Error("GameplayDeveloper returned no source code");
-    }
-    const written: string[] = [];
-    for (const replacement of replacements) {
-      if (!replacement.content.trim()) continue;
-      const target = safeSourcePath(projectPath, replacement.path);
-      await mkdir(dirname(target), { recursive: true });
-      await writeFile(target, replacement.content, "utf8");
-      written.push(relative(projectPath, target));
-      logger.debug("Gameplay module written", {
-        file: relative(projectPath, target),
-        bytes: replacement.content.length,
-      });
-    }
+    const result = await this.phaseOrchestrator.executePhases(phases, plan, projectPath, this.provider);
+    const written = [result.targetModule];
     const manifestPath = resolve(projectPath, ".factory", "gameplay-generation.json");
+    const phaseManifestPath = resolve(projectPath, ".factory", "gameplay-phases.json");
     await mkdir(dirname(manifestPath), { recursive: true });
-    await writeFile(
-      manifestPath,
-      `${JSON.stringify({ provider: this.provider.kind, files: written, explanation: response.explanation }, null, 2)}\n`,
-      "utf8",
-    );
-    logger.info("Gameplay code generated", { projectPath, files: written, provider: this.provider.kind });
-    return { files: written, explanation: response.explanation };
+    const explanation = result.explanations.filter(Boolean).join("\n");
+    await Promise.all([
+      writeFile(
+        manifestPath,
+        `${JSON.stringify({ provider: this.provider.kind, files: written, explanation }, null, 2)}\n`,
+        "utf8",
+      ),
+      this.writePhaseManifest(phaseManifestPath, result),
+    ]);
+    logger.info("Gameplay code generated", {
+      projectPath,
+      files: written,
+      provider: this.provider.kind,
+      completedPhases: result.completedPhases,
+    });
+    return { files: written, explanation, phaseTimings: result.phaseTimings };
+  }
+
+  private async writePhaseManifest(path: string, result: PhaseExecutionResult): Promise<void> {
+    await writeFile(path, `${JSON.stringify({
+      status: "completed",
+      targetModule: result.targetModule,
+      completedPhases: result.completedPhases,
+      phaseTimings: result.phaseTimings,
+      validationResults: result.validationResults,
+    }, null, 2)}\n`, "utf8");
+    logger.debug("Gameplay phase manifest written", { path, completedPhases: result.completedPhases });
   }
 }

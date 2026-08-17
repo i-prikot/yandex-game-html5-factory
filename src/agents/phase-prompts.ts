@@ -23,7 +23,12 @@ function compact(value: string, limit: number): string {
   return normalized.length <= limit ? normalized : `${normalized.slice(0, Math.max(0, limit - 3))}...`;
 }
 
-export function buildPhasePrompt(phase: GameplayPhase, plan: GamePlan, previousCode: string): string {
+export function buildPhasePrompt(
+  phase: GameplayPhase,
+  plan: GamePlan,
+  previousCode: string,
+  validationFeedback?: string,
+): string {
   const nextPhase = NEXT_PHASE_BY_NAME[phase.name];
   const constraint = nextPhase
     ? `Generate only code for ${phase.name}. Do not implement ${nextPhase}.`
@@ -37,7 +42,10 @@ export function buildPhasePrompt(phase: GameplayPhase, plan: GamePlan, previousC
     "Preserve the exported template contract and all working behavior from earlier phases.",
     "The complete current module is supplied in the files context. A compact excerpt follows:",
   ].join("\n");
-  const suffix = `\n${constraint}`;
+  const feedback = validationFeedback
+    ? `\nThe previous attempt failed TypeScript validation. Correct these diagnostics: ${compact(validationFeedback, 350)}`
+    : "";
+  const suffix = `${feedback}\n${constraint}`;
   const excerptBudget = Math.max(0, MAX_PHASE_PROMPT_LENGTH - prefix.length - suffix.length - 1);
   const prompt = `${prefix}\n${compact(previousCode, excerptBudget)}${suffix}`;
   if (prompt.length > MAX_PHASE_PROMPT_LENGTH) {
@@ -48,6 +56,7 @@ export function buildPhasePrompt(phase: GameplayPhase, plan: GamePlan, previousC
     promptLength: prompt.length,
     previousCodeBytes: previousCode.length,
     nextPhase,
+    hasValidationFeedback: Boolean(validationFeedback),
   });
   return prompt;
 }

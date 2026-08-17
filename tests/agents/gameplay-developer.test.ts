@@ -5,7 +5,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { GameplayDeveloper } from "../../src/agents/gameplay-developer.js";
 import type { GamePlan } from "../../src/agents/game-planner.js";
+import { PhaseOrchestrator } from "../../src/agents/phase-orchestrator.js";
 import type { IProvider } from "../../src/providers/base.js";
+import type { ProcessRunner } from "../../src/providers/process-runner.js";
 
 const createdDirectories: string[] = [];
 const plan: GamePlan = {
@@ -17,13 +19,18 @@ const plan: GamePlan = {
   assets: [],
   quality: "LOW",
 };
+const passingRunner: ProcessRunner = vi.fn(async () => ({ exitCode: 0, stdout: "", stderr: "" }));
+
+function createDeveloper(provider: IProvider): GameplayDeveloper {
+  return new GameplayDeveloper(provider, new PhaseOrchestrator({ runner: passingRunner }));
+}
 
 afterEach(async () => {
   await Promise.all(createdDirectories.splice(0).map((directory) => rm(directory, { recursive: true, force: true })));
 });
 
 describe("GameplayDeveloper", () => {
-  it("writes validated provider files and records generation metadata", async () => {
+  it("executes phases in order and records generation metadata", async () => {
     const projectPath = await mkdtemp(join(process.cwd(), "projects", "gameplay-test-"));
     createdDirectories.push(projectPath);
     await mkdir(join(projectPath, "src"));
@@ -37,11 +44,23 @@ describe("GameplayDeveloper", () => {
       })),
     } as unknown as IProvider;
 
-    const result = await new GameplayDeveloper(provider).writeCode(plan, projectPath);
+    const result = await createDeveloper(provider).writeCode(plan, projectPath);
 
     expect(result.files).toEqual(["src/game3d.ts"]);
     expect(await readFile(join(projectPath, "src", "game3d.ts"), "utf8")).toContain("arena = true");
     expect(await readFile(join(projectPath, ".factory", "gameplay-generation.json"), "utf8")).toContain("codex");
+    const phaseManifest = JSON.parse(
+      await readFile(join(projectPath, ".factory", "gameplay-phases.json"), "utf8"),
+    ) as { status: string; completedPhases: string[] };
+    expect(phaseManifest).toMatchObject({
+      status: "completed",
+      completedPhases: ["scene-setup", "camera-controls", "player-entity", "game-mechanics", "optimization"],
+    });
+    expect(provider.generateCode).toHaveBeenCalledTimes(5);
+    expect((provider.generateCode as ReturnType<typeof vi.fn>).mock.calls.map((call) => {
+      const context = call[1] as { metadata: { phase: string } };
+      return context.metadata.phase;
+    })).toEqual(phaseManifest.completedPhases);
   });
 
   it("uses code when the provider also returns empty placeholder files", async () => {
@@ -58,7 +77,7 @@ describe("GameplayDeveloper", () => {
       })),
     } as unknown as IProvider;
 
-    const result = await new GameplayDeveloper(provider).writeCode(plan, projectPath);
+    const result = await createDeveloper(provider).writeCode(plan, projectPath);
 
     expect(result.files).toEqual(["src/game3d.ts"]);
     expect(await readFile(join(projectPath, "src", "game3d.ts"), "utf8"))
@@ -75,6 +94,6 @@ describe("GameplayDeveloper", () => {
       generateCode: vi.fn(async () => ({ code: "", explanation: "", files: [{ path: "../secret.ts", content: "bad" }] })),
     } as unknown as IProvider;
 
-    await expect(new GameplayDeveloper(provider).writeCode(plan, projectPath)).rejects.toThrow("inside src");
+    await expect(createDeveloper(provider).writeCode(plan, projectPath)).rejects.toThrow("may replace only src/game3d.ts");
   });
 });
