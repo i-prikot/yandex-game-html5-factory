@@ -37,6 +37,7 @@ beforeEach(() => {
   vi.stubEnv("CODEX_ONLY_MODEL_GAMEPLAY_DEVELOPER", "");
   vi.stubEnv("CODEX_ONLY_MODEL_BUG_FIXER", "");
   vi.stubEnv("CODEX_ONLY_MODEL_VISUAL_REVIEWER", "");
+  vi.stubEnv("CODEX_ONLY_TIMEOUT_MS", "");
 });
 
 afterEach(async () => {
@@ -49,6 +50,54 @@ afterEach(async () => {
 });
 
 describe("CodexOnlyProvider", () => {
+  it("uses a five-minute request timeout by default", async () => {
+    let requestTimeoutMs: number | undefined;
+    const runner: ProcessRunner = vi.fn(async (_command, args, options) => {
+      if (args[0] === "--version") return { exitCode: 0, stdout: "codex 1", stderr: "" };
+      requestTimeoutMs = options.timeoutMs;
+      return { exitCode: 0, stdout: jsonlResponse(codeResponse), stderr: "" };
+    });
+    const provider = new CodexOnlyProvider({ runner, codexHomePath: await createCodexHome() });
+
+    await provider.generateCode("Create gameplay", { projectPath: process.cwd(), role: "GameplayDeveloper" });
+
+    expect(requestTimeoutMs).toBe(300_000);
+  });
+
+  it("uses CODEX_ONLY_TIMEOUT_MS for request timeouts", async () => {
+    vi.stubEnv("CODEX_ONLY_TIMEOUT_MS", "420000");
+    let requestTimeoutMs: number | undefined;
+    const runner: ProcessRunner = vi.fn(async (_command, args, options) => {
+      if (args[0] === "--version") return { exitCode: 0, stdout: "codex 1", stderr: "" };
+      requestTimeoutMs = options.timeoutMs;
+      return { exitCode: 0, stdout: jsonlResponse(codeResponse), stderr: "" };
+    });
+    const provider = new CodexOnlyProvider({ runner, codexHomePath: await createCodexHome() });
+
+    await provider.generateCode("Create gameplay", { projectPath: process.cwd(), role: "GameplayDeveloper" });
+
+    expect(requestTimeoutMs).toBe(420_000);
+  });
+
+  it("keeps an explicit timeout option authoritative", async () => {
+    vi.stubEnv("CODEX_ONLY_TIMEOUT_MS", "420000");
+    let requestTimeoutMs: number | undefined;
+    const runner: ProcessRunner = vi.fn(async (_command, args, options) => {
+      if (args[0] === "--version") return { exitCode: 0, stdout: "codex 1", stderr: "" };
+      requestTimeoutMs = options.timeoutMs;
+      return { exitCode: 0, stdout: jsonlResponse(codeResponse), stderr: "" };
+    });
+    const provider = new CodexOnlyProvider({
+      runner,
+      timeoutMs: 15_000,
+      codexHomePath: await createCodexHome(),
+    });
+
+    await provider.generateCode("Create gameplay", { projectPath: process.cwd(), role: "GameplayDeveloper" });
+
+    expect(requestTimeoutMs).toBe(15_000);
+  });
+
   it("passes the resolved model immediately after --model", async () => {
     let execArgs: readonly string[] = [];
     const runner: ProcessRunner = vi.fn(async (_command, args) => {

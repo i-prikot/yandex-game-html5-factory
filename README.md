@@ -77,6 +77,7 @@ Copy `.env.example` to `.env`. Empty asset API keys are supported.
 | `CODEX_ONLY_MODEL_VISUAL_REVIEWER` | empty | Optional `VisualReviewer` model; empty uses `CODEX_ONLY_MODEL_DEFAULT` |
 | `YGG_SDK_ENABLED` | `true` | Enable the Yandex Games SDK adapter |
 | `LOG_LEVEL` | `debug` | Structured log threshold; supports `silent` |
+| `FACTORY_HOST_PORT` | `15173` | Host port mapped to the factory's internal Vite port `5173` |
 
 API keys, including `CRS_OAI_KEY`, stay only in the factory process environment. They are not copied into generated game source, factory-generated Codex configuration, Vite bundles, Docker images, or production ZIP files. The Codex-only provider writes an isolated `CODEX_HOME` containing CRS connection settings and a minimal key-free `auth.json`; it never modifies the user's personal `~/.codex` configuration.
 

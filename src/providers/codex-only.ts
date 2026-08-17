@@ -59,6 +59,12 @@ const ROLE_MODEL_ENV_NAMES: Readonly<Record<string, string>> = {
   BugFixer: "CODEX_ONLY_MODEL_BUG_FIXER",
   VisualReviewer: "CODEX_ONLY_MODEL_VISUAL_REVIEWER",
 };
+const DEFAULT_TIMEOUT_MS = 300_000;
+
+function resolveTimeoutMs(value: string | undefined): number {
+  const timeoutMs = Number(value?.trim());
+  return Number.isSafeInteger(timeoutMs) && timeoutMs > 0 ? timeoutMs : DEFAULT_TIMEOUT_MS;
+}
 
 export interface CodexOnlyProviderOptions {
   command?: string;
@@ -77,7 +83,7 @@ export class CodexOnlyProvider implements IProvider {
 
   public constructor(options: CodexOnlyProviderOptions = {}) {
     this.command = options.command ?? process.env.CODEX_CLI_PATH ?? "codex";
-    this.timeoutMs = options.timeoutMs ?? 180_000;
+    this.timeoutMs = options.timeoutMs ?? resolveTimeoutMs(process.env.CODEX_ONLY_TIMEOUT_MS);
     this.runner = options.runner ?? runProcess;
     this.codexHomePath = options.codexHomePath ?? path.join(os.tmpdir(), "codex-only-crs");
   }
@@ -204,6 +210,7 @@ export class CodexOnlyProvider implements IProvider {
     this.logger.info("Requesting Codex-only", {
       role: context.role,
       model,
+      timeoutMs: this.timeoutMs,
       hasImage: Boolean(imagePath),
     });
     const result = await this.runner(this.command, args, {

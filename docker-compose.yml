@@ -25,7 +25,7 @@ services:
       XAI_API_KEY: ${XAI_API_KEY:-}
       YGG_SDK_ENABLED: ${YGG_SDK_ENABLED:-true}
     ports:
-      - "5173:5173"
+      - "${FACTORY_HOST_PORT:-15173}:5173"
     volumes:
       - ./projects:/app/projects
       - ./output:/app/output
