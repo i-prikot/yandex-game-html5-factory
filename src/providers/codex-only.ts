@@ -33,14 +33,14 @@ const fixResponseSchema = z.object({
 });
 
 const CODEX_CONFIG = `model_provider = "crs"
-model = "gpt-5.4"
+model = "gpt-5.6-luna"
 model_reasoning_effort = "high"
 disable_response_storage = true
 preferred_auth_method = "apikey"
 
 [model_providers.crs]
 name = "crs"
-base_url = "https://bridge.gptclaudegemini.xyz/"
+base_url = "https://5x.gptclaudegemini.xyz/"
 wire_api = "responses"
 requires_openai_auth = false
 env_key = "CRS_OAI_KEY"
@@ -145,7 +145,7 @@ export class CodexOnlyProvider implements IProvider {
   private resolveModel(role: string): string {
     const roleEnvName = ROLE_MODEL_ENV_NAMES[role];
     const roleModel = roleEnvName ? process.env[roleEnvName]?.trim() : undefined;
-    const defaultModel = process.env.CODEX_ONLY_MODEL_DEFAULT?.trim() || "gpt-5.4";
+    const defaultModel = process.env.CODEX_ONLY_MODEL_DEFAULT?.trim() || "gpt-5.6-luna";
     const model = roleModel || defaultModel;
     this.logger.debug("Resolved Codex-only model", { role, model });
     return model;
@@ -195,7 +195,6 @@ export class CodexOnlyProvider implements IProvider {
     if (imagePath) {
       args.push("--image", imagePath);
     }
-    args.push(prompt);
 
     const runnerEnv: NodeJS.ProcessEnv = {
       ...process.env,
@@ -211,6 +210,7 @@ export class CodexOnlyProvider implements IProvider {
       cwd: context.projectPath,
       timeoutMs: this.timeoutMs,
       env: runnerEnv,
+      stdin: prompt,
     });
     if (result.exitCode !== 0) {
       const stderr = this.sanitizeMessage(result.stderr.slice(-1_000));

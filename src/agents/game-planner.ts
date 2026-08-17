@@ -5,8 +5,42 @@ import { createLogger } from "../core/logger.js";
 import { resolveQualityPreset, type QualityPresetName } from "../performance/budgets.js";
 import type { IProvider } from "../providers/base.js";
 
+const logger = createLogger("agent-game-planner");
+
+const SUPPORTED_ASSET_TYPES = ["3d-model", "texture", "sprite", "audio", "ui"] as const;
+
+function normalizeAssetType(value: string): AssetRequest["type"] | undefined {
+  const normalized = value.trim().toLowerCase().replace(/[\s_]+/gu, "-");
+  if ((SUPPORTED_ASSET_TYPES as readonly string[]).includes(normalized)) {
+    return normalized as AssetRequest["type"];
+  }
+  if (/(?:^|-)3d(?:-|$)|model|mesh|geometry/iu.test(normalized)) return "3d-model";
+  if (/texture|material|background|tile|terrain|ground/iu.test(normalized)) return "texture";
+  if (/audio|sound|music|sfx|voice/iu.test(normalized)) return "audio";
+  if (/ui|hud|interface|button|icon|menu/iu.test(normalized)) return "ui";
+  if (/sprite|2d|character|player|enemy|npc|collectible|obstacle|prop|image/iu.test(normalized)) {
+    return "sprite";
+  }
+  return undefined;
+}
+
+const assetTypeSchema = z.string().min(1).transform((value, context): AssetRequest["type"] => {
+  const normalized = normalizeAssetType(value);
+  if (!normalized) {
+    context.addIssue({
+      code: "custom",
+      message: `Unsupported asset type '${value}'; expected one of ${SUPPORTED_ASSET_TYPES.join(", ")}`,
+    });
+    return z.NEVER;
+  }
+  if (normalized !== value) {
+    logger.debug("Normalized AI asset type", { received: value, normalized });
+  }
+  return normalized;
+});
+
 const assetSchema = z.object({
-  type: z.enum(["3d-model", "texture", "sprite", "audio", "ui"]),
+  type: assetTypeSchema,
   name: z.string().min(1),
   description: z.string().min(1),
   tags: z.array(z.string()),
@@ -35,8 +69,6 @@ export interface PlannerHints {
   title?: string;
   type?: "auto" | "2d" | "3d";
 }
-
-const logger = createLogger("agent-game-planner");
 
 function stripFence(value: string): string {
   return value.trim().replace(/^```(?:json)?\s*/u, "").replace(/\s*```$/u, "");
@@ -85,6 +117,7 @@ export class GamePlanner {
           `Brief: ${prompt}`,
           `Requested quality: ${quality}. Requested type: ${hints.type ?? "auto"}.`,
           "Schema: {title,type:'2d'|'3d',genre,mechanics:string[],assets:[{type,name,description,tags:string[]}],quality:'LOW'|'MEDIUM'|'HIGH'}.",
+          `Every asset type must be exactly one of: ${SUPPORTED_ASSET_TYPES.join(", ")}. Do not invent asset categories.`,
           "Choose native Canvas for 2D and Babylon.js for 3D. Respect low-end hardware and prefer procedural assets.",
         ].join("\n"),
         { projectPath: process.cwd(), role: "GamePlanner", gameBrief: prompt },

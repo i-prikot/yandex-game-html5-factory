@@ -1,6 +1,7 @@
 import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import { strFromU8, unzipSync } from "fflate";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { BuildManager } from "../../src/agents/build-manager.js";
@@ -36,7 +37,7 @@ describe("BuildManager", () => {
     expect((await readFile(result.packagePath)).subarray(0, 2).toString()).toBe("PK");
   });
 
-  it("refuses a build without the Yandex SDK", async () => {
+  it("restores the Yandex SDK in a build that omitted it", async () => {
     const root = await mkdtemp(join(process.cwd(), "output", "build-manager-yandex-test-"));
     createdDirectories.push(root);
     const projectPath = join(root, "sample-game");
@@ -44,7 +45,13 @@ describe("BuildManager", () => {
     await writeFile(join(projectPath, "dist", "index.html"), "<html></html>", "utf8");
     const manager = new BuildManager({ outputRoot: root, runner: async () => ({ exitCode: 0, stdout: "", stderr: "" }) });
 
-    await expect(manager.buildForYandex(projectPath)).rejects.toThrow("Yandex Games SDK");
+    const result = await manager.buildForYandex(projectPath);
+    const entries = unzipSync(new Uint8Array(await readFile(result.packagePath)));
+    const packagedIndex = strFromU8(entries["index.html"] ?? new Uint8Array());
+
+    expect(await readFile(join(projectPath, "dist", "index.html"), "utf8"))
+      .toContain('<script src="https://yandex.ru/games/sdk/v2"></script>');
+    expect(packagedIndex).toContain('<script src="https://yandex.ru/games/sdk/v2"></script>');
   });
 
   it("refuses a dist file containing CRS_OAI_KEY", async () => {

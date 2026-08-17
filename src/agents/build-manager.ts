@@ -1,5 +1,5 @@
 import { createWriteStream } from "node:fs";
-import { mkdir, readFile, readdir, stat } from "node:fs/promises";
+import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { basename, extname, join, resolve } from "node:path";
 
 import archiver from "archiver";
@@ -20,6 +20,8 @@ export interface BuildManagerOptions {
 }
 
 const logger = createLogger("agent-build-manager");
+const YANDEX_SDK_URL = "https://yandex.ru/games/sdk/v2";
+const YANDEX_SDK_SCRIPT = `<script src="${YANDEX_SDK_URL}"></script>`;
 const SECRET_ENV_NAMES = [
   "GOOGLE_API_KEY",
   "XAI_API_KEY",
@@ -66,6 +68,19 @@ async function createZip(distPath: string, packagePath: string): Promise<void> {
   });
 }
 
+async function ensureYandexSdk(indexPath: string): Promise<string> {
+  const index = await readFile(indexPath, "utf8");
+  if (index.includes(YANDEX_SDK_URL)) return index;
+
+  const script = `    ${YANDEX_SDK_SCRIPT}`;
+  const updated = /<\/head>/iu.test(index)
+    ? index.replace(/<\/head>/iu, `${script}\n  </head>`)
+    : `${script}\n${index}`;
+  await writeFile(indexPath, updated, "utf8");
+  logger.warn("Restored missing Yandex Games SDK v2 script", { indexPath });
+  return updated;
+}
+
 export class BuildManager {
   private readonly outputRoot: string;
   private readonly runner: ProcessRunner;
@@ -86,8 +101,8 @@ export class BuildManager {
       throw error;
     }
     const indexPath = join(distPath, "index.html");
-    const index = await readFile(indexPath, "utf8");
-    if (!index.includes("https://yandex.ru/games/sdk/v2")) {
+    const index = await ensureYandexSdk(indexPath);
+    if (!index.includes(YANDEX_SDK_URL)) {
       throw new Error("Production index.html does not load Yandex Games SDK v2");
     }
     if (!(await stat(indexPath)).isFile()) throw new Error("Production index.html is not a file");

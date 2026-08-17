@@ -40,4 +40,34 @@ describe("GamePlanner", () => {
     expect(plan.assets.length).toBeGreaterThan(0);
     expect(plan.quality).toBe("LOW");
   });
+
+  it("normalizes common AI asset labels to supported resolver types", async () => {
+    const provider = {
+      kind: "codex-only",
+      generateCode: vi.fn(async () => ({
+        code: JSON.stringify({
+          title: "Goose Run",
+          type: "2d",
+          genre: "runner",
+          mechanics: ["movement", "collectibles"],
+          assets: [
+            { type: "character", name: "goose", description: "Player goose", tags: ["player"] },
+            { type: "sound_effect", name: "honk", description: "Goose honk", tags: ["sfx"] },
+            { type: "HUD_ELEMENT", name: "score", description: "Score display", tags: ["hud"] },
+          ],
+          quality: "LOW",
+        }),
+        explanation: "planned",
+        files: [],
+      })),
+    } as unknown as IProvider;
+
+    const plan = await new GamePlanner(provider).analyze("A goose runner", "LOW", { type: "2d" });
+
+    expect(plan.assets.map((asset) => asset.type)).toEqual(["sprite", "audio", "ui"]);
+    expect(provider.generateCode).toHaveBeenCalledWith(
+      expect.stringContaining("3d-model, texture, sprite, audio, ui"),
+      expect.objectContaining({ role: "GamePlanner" }),
+    );
+  });
 });

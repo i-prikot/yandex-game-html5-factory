@@ -53,10 +53,20 @@ export class GameplayDeveloper {
         metadata: { type: plan.type, genre: plan.genre, quality: plan.quality },
       },
     );
-    const replacements = response.files.length > 0
-      ? response.files
-      : [{ path: targetModule, content: response.code }];
-    if (replacements.length === 0 || replacements.every((file) => file.content.trim().length === 0)) {
+    const populatedFiles = response.files.filter((file) => file.content.trim().length > 0);
+    const replacements = populatedFiles.length > 0
+      ? populatedFiles
+      : response.code.trim().length > 0
+        ? [{ path: targetModule, content: response.code }]
+        : [];
+    if (response.files.length > populatedFiles.length) {
+      logger.debug("Ignored empty gameplay file replacements", {
+        ignoredFiles: response.files.length - populatedFiles.length,
+        usableFiles: populatedFiles.length,
+        usedCodeFallback: populatedFiles.length === 0 && replacements.length > 0,
+      });
+    }
+    if (replacements.length === 0) {
       throw new Error("GameplayDeveloper returned no source code");
     }
     const written: string[] = [];

@@ -70,7 +70,7 @@ Copy `.env.example` to `.env`. Empty asset API keys are supported.
 | `XAI_API_KEY` | empty | Optional image generation |
 | `TRIPO3D_API_KEY` | empty | Optional 3D generation |
 | `CRS_OAI_KEY` | empty | OpenAI-compatible CRS proxy key; required when `AI_PROVIDER=codex-only` |
-| `CODEX_ONLY_MODEL_DEFAULT` | `gpt-5.4` | Fallback model for Codex-only requests without a role override |
+| `CODEX_ONLY_MODEL_DEFAULT` | `gpt-5.6-luna` | Fallback model for Codex-only requests without a role override |
 | `CODEX_ONLY_MODEL_GAME_PLANNER` | empty | Optional `GamePlanner` model; empty uses `CODEX_ONLY_MODEL_DEFAULT` |
 | `CODEX_ONLY_MODEL_GAMEPLAY_DEVELOPER` | empty | Optional `GameplayDeveloper` model; empty uses `CODEX_ONLY_MODEL_DEFAULT` |
 | `CODEX_ONLY_MODEL_BUG_FIXER` | empty | Optional `BugFixer` model; empty uses `CODEX_ONLY_MODEL_DEFAULT` |

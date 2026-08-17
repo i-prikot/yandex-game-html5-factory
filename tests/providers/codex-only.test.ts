@@ -88,7 +88,7 @@ describe("CodexOnlyProvider", () => {
     expect(execArgs[execArgs.indexOf("--model") + 1]).toBe(expectedModel);
   });
 
-  it("falls back to the configured default and then gpt-5.4", async () => {
+  it("falls back to the configured default and then the built-in model", async () => {
     const usedModels: string[] = [];
     const runner: ProcessRunner = vi.fn(async (_command, args) => {
       if (args[0] === "--version") return { exitCode: 0, stdout: "codex 1", stderr: "" };
@@ -101,7 +101,7 @@ describe("CodexOnlyProvider", () => {
     vi.stubEnv("CODEX_ONLY_MODEL_DEFAULT", "");
     await provider.generateCode("Create gameplay", { projectPath: process.cwd(), role: "GamePlanner" });
 
-    expect(usedModels).toEqual(["gpt-default-test", "gpt-5.4"]);
+    expect(usedModels).toEqual(["gpt-default-test", "gpt-5.6-luna"]);
   });
 
   it("is unavailable without CRS_OAI_KEY", async () => {
@@ -161,7 +161,7 @@ describe("CodexOnlyProvider", () => {
         const config = await readFile(join(codexHomePath, "config.toml"), "utf8");
         const auth = JSON.parse(await readFile(join(codexHomePath, "auth.json"), "utf8")) as unknown;
         expect(config).toContain('model_provider = "crs"');
-        expect(config).toContain('base_url = "https://bridge.gptclaudegemini.xyz/"');
+        expect(config).toContain('base_url = "https://5x.gptclaudegemini.xyz/"');
         expect(config).toContain('wire_api = "responses"');
         expect(config).toContain('env_key = "CRS_OAI_KEY"');
         expect(config).toContain("disable_response_storage = true");
@@ -213,6 +213,32 @@ describe("CodexOnlyProvider", () => {
     const imageFlagIndex = execArgs.indexOf("--image");
     expect(execArgs[imageFlagIndex + 1]).toBe(imagePath);
     await expect(access(imagePath)).rejects.toThrow();
+  });
+
+  it("passes screenshot prompts through stdin instead of command arguments", async () => {
+    const projectPath = await createCodexHome();
+    let execArgs: readonly string[] = [];
+    let requestStdin: string | undefined;
+    const runner: ProcessRunner = vi.fn(async (_command, args, options) => {
+      if (args[0] === "--version") return { exitCode: 0, stdout: "codex 1", stderr: "" };
+      execArgs = args;
+      requestStdin = options.stdin;
+      return {
+        exitCode: 0,
+        stdout: jsonlResponse({ passed: true, issues: [], suggestions: [], confidence: 1 }),
+        stderr: "",
+      };
+    });
+    const provider = new CodexOnlyProvider({ runner, codexHomePath: join(projectPath, "codex-home") });
+
+    await provider.analyzeScreenshot(Buffer.from("image").toString("base64"), {
+      projectPath,
+      role: "VisualReviewer",
+    });
+
+    expect(execArgs).not.toContain(requestStdin);
+    expect(execArgs.at(-2)).toBe("--image");
+    expect(requestStdin).toContain("Inspect the attached game screenshot");
   });
 
   it("redacts the API key from failed request errors and logs", async () => {

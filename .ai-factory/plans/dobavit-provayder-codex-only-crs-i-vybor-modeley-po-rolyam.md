@@ -37,7 +37,7 @@ CRS (Custom REST Service) OpenAI-compatible proxy. The API key is sourced exclus
 - [x] Define `interface CodexOnlyProviderOptions` with fields: `command?: string`, `timeoutMs?: number`, `runner?: ProcessRunner`, `codexHomePath?: string`.
 - [x] Implement `export class CodexOnlyProvider implements IProvider` with: `public readonly kind = "codex-only" as const`; private logger `createLogger("provider-codex-only")`; private fields `command` (default `process.env.CODEX_CLI_PATH ?? "codex"`), `timeoutMs` (default `180_000`), `runner` (default `runProcess`), `codexHomePath` (default `path.join(os.tmpdir(), "codex-only-crs")`).
 - [x] Implement `isAvailable(): Promise<boolean>`: run `this.runner(this.command, ["--version"], { cwd: process.cwd(), timeoutMs: 10_000 })` and check `exitCode === 0`; also check `!!process.env.CRS_OAI_KEY`. Return `false` with a DEBUG log on any failure. Do NOT log the key value.
-- [x] Implement `private resolveModel(role: string): string`: return the documented role-specific `CODEX_ONLY_MODEL_*` value when non-empty; otherwise return `process.env.CODEX_ONLY_MODEL_DEFAULT ?? "gpt-5.4"`. Log the resolved model name at DEBUG with the role name (not the key value).
+- [x] Implement `private resolveModel(role: string): string`: return the documented role-specific `CODEX_ONLY_MODEL_*` value when non-empty; otherwise return `process.env.CODEX_ONLY_MODEL_DEFAULT ?? "gpt-5.6-luna"`. Log the resolved model name at DEBUG with the role name (not the key value).
 - [x] Implement `private async prepareCodexHome(): Promise<void>`: call `await mkdir(this.codexHomePath, { recursive: true })`; write `config.toml` to `path.join(this.codexHomePath, "config.toml")` with the required Codex CLI TOML content that sets `env_key = "CRS_OAI_KEY"` for the OpenAI-compatible provider; write `auth.json` to `path.join(this.codexHomePath, "auth.json")` with content `JSON.stringify({ OPENAI_API_KEY: null }, null, 2)`. Log at DEBUG the prepared path (not the key).
 - [x] Implement `private systemContext(context: ProviderContext): string` — body identical to `CodexProvider.systemContext`.
 - [x] Implement `private async request<T>(prompt, context, schema, imagePath?)`: (1) `await this.prepareCodexHome()`; (2) throw `ProviderUnavailableError` if not available; (3) `resolveModel(context.role)`; (4) build args `["exec","--json","--sandbox","workspace-write","--skip-git-repo-check","--model", resolvedModel]`, append `["--image", imagePath]` when provided, append prompt last; (5) build `runnerEnv = { ...process.env, CODEX_HOME: this.codexHomePath, CRS_OAI_KEY: process.env.CRS_OAI_KEY ?? "" }`; (6) call `this.runner(this.command, args, { cwd: context.projectPath, timeoutMs: this.timeoutMs, env: runnerEnv })`; (7) on non-zero exit log ERROR and throw a plain `Error`; (8) parse with `extractAgentMessage` → `JSON.parse` → `schema.parse`, throw `ProviderResponseError` on failure; (9) log DEBUG `{ role, stdoutBytes }` on success.
@@ -84,7 +84,7 @@ CRS (Custom REST Service) OpenAI-compatible proxy. The API key is sourced exclus
 - [x] Append the following block to `.env.example`:
   ```
   CRS_OAI_KEY=
-  CODEX_ONLY_MODEL_DEFAULT=gpt-5.4
+  CODEX_ONLY_MODEL_DEFAULT=gpt-5.6-luna
   CODEX_ONLY_MODEL_GAME_PLANNER=
   CODEX_ONLY_MODEL_GAMEPLAY_DEVELOPER=
   CODEX_ONLY_MODEL_BUG_FIXER=
@@ -98,7 +98,7 @@ CRS (Custom REST Service) OpenAI-compatible proxy. The API key is sourced exclus
 - [x] Add the following entries to the `environment` section of `docker-compose.yml`:
   ```yaml
   CRS_OAI_KEY: ${CRS_OAI_KEY:-}
-  CODEX_ONLY_MODEL_DEFAULT: ${CODEX_ONLY_MODEL_DEFAULT:-gpt-5.4}
+  CODEX_ONLY_MODEL_DEFAULT: ${CODEX_ONLY_MODEL_DEFAULT:-gpt-5.6-luna}
   CODEX_ONLY_MODEL_GAME_PLANNER: ${CODEX_ONLY_MODEL_GAME_PLANNER:-}
   CODEX_ONLY_MODEL_GAMEPLAY_DEVELOPER: ${CODEX_ONLY_MODEL_GAMEPLAY_DEVELOPER:-}
   CODEX_ONLY_MODEL_BUG_FIXER: ${CODEX_ONLY_MODEL_BUG_FIXER:-}
@@ -114,7 +114,7 @@ Create `tests/providers/codex-only.test.ts` using the same mock/spy pattern as `
 
 - [x] Test: `generateCode` produces an args array containing `"--model"` immediately followed by the resolved model string.
 - [x] Test: when `CODEX_ONLY_MODEL_GAME_PLANNER` is set to a non-empty string, a request with `context.role = "GamePlanner"` uses that value as the model.
-- [x] Test: `resolveModel` falls back to `CODEX_ONLY_MODEL_DEFAULT` (and ultimately to `"gpt-5.4"`) when no role-specific env var is set.
+- [x] Test: `resolveModel` falls back to `CODEX_ONLY_MODEL_DEFAULT` (and ultimately to `"gpt-5.6-luna"`) when no role-specific env var is set.
 - [x] Test: `isAvailable()` returns `false` when `CRS_OAI_KEY` is absent from the environment, even if the mock runner returns `exitCode === 0`.
 - [x] Test: `isAvailable()` returns `true` when mock runner returns `exitCode === 0` AND `CRS_OAI_KEY` is a non-empty string.
 - [x] Test: the args array passed to the runner contains no occurrence of the `CRS_OAI_KEY` value at any position.
@@ -138,7 +138,7 @@ Create `tests/providers/codex-only.test.ts` using the same mock/spy pattern as `
 
 - [x] In `README.md`, find the `AI_PROVIDER` env-var table row and append `codex-only` to its valid-values list with a parenthetical note that it requires `CRS_OAI_KEY`.
 - [x] Add a new table row for `CRS_OAI_KEY`: describe it as the OpenAI-compatible API key for the CRS proxy, required when `AI_PROVIDER=codex-only`; note it is never embedded in generated source, Vite bundles, Docker images, or ZIP archives.
-- [x] Add a table row for `CODEX_ONLY_MODEL_DEFAULT` (default: `gpt-5.4`) — fallback model for the `codex-only` provider when no role-specific override is set.
+- [x] Add a table row for `CODEX_ONLY_MODEL_DEFAULT` (default: `gpt-5.6-luna`) — fallback model for the `codex-only` provider when no role-specific override is set.
 - [x] Add table rows for `CODEX_ONLY_MODEL_GAME_PLANNER`, `CODEX_ONLY_MODEL_GAMEPLAY_DEVELOPER`, `CODEX_ONLY_MODEL_BUG_FIXER`, `CODEX_ONLY_MODEL_VISUAL_REVIEWER` — all optional, empty means the provider uses `CODEX_ONLY_MODEL_DEFAULT`.
 
 ---
@@ -165,3 +165,33 @@ Create `tests/providers/codex-only.test.ts` using the same mock/spy pattern as `
 - [x] Run `npm test` — all suites must pass, including the new `tests/providers/codex-only.test.ts`.
 - [x] Manual smoke: `AI_PROVIDER=codex-only CRS_OAI_KEY=<key> npm run cli` — CLI must accept `codex-only` as a valid provider choice and attempt to invoke `CodexOnlyProvider`.
 - [x] Secret guard: run `npm run build`; confirm `BuildManager.assertNoSecrets()` would flag any accidental inclusion of `CRS_OAI_KEY` value in `dist/` output (verified by the addition to `SECRET_ENV_NAMES`).
+
+---
+
+## Rework — 2026-08-17 Runtime Response Handling
+
+- [x] `src/agents/gameplay-developer.ts`: ignore empty `files` entries and fall back to the non-empty `code` field so a valid Codex response is not rejected as “returned no source code”.
+- [x] `src/agents/game-planner.ts`: constrain and normalize AI asset types to the supported asset-pipeline vocabulary instead of discarding an otherwise valid plan.
+- [x] Add focused regression coverage for the empty-file gameplay response and Codex asset-type aliases observed during the CLI run.
+- [x] Run focused tests, `npm run typecheck`, and `npm test`.
+
+---
+
+## Rework — 2026-08-17 Codex Vision Stdin and Production SDK
+
+- [x] `src/providers/process-runner.ts` and `src/providers/codex-only.ts`: pipe Codex-only prompts through stdin so variadic `--image` arguments cannot consume the prompt.
+- [x] `src/agents/build-manager.ts`: restore the mandatory Yandex Games SDK v2 script in built `dist/index.html` before validation and packaging.
+- [x] Add focused regression coverage for ProcessRunner stdin, Codex-only screenshot prompts, and production SDK restoration.
+- [x] Run focused tests, `npm run typecheck`, and `npm test`.
+
+---
+
+## Rework — 2026-08-17 CRS Base URL
+
+- [x] `src/providers/codex-only.ts`: use the specified CRS endpoint `https://5x.gptclaudegemini.xyz/` and update the focused config test.
+
+---
+
+## Rework — 2026-08-17 Documented Default Model
+
+- [x] `src/providers/codex-only.ts`: restore `gpt-5.6-luna` as both the generated Codex configuration model and the built-in role-selection fallback; update the focused fallback assertion.

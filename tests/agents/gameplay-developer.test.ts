@@ -44,6 +44,27 @@ describe("GameplayDeveloper", () => {
     expect(await readFile(join(projectPath, ".factory", "gameplay-generation.json"), "utf8")).toContain("codex");
   });
 
+  it("uses code when the provider also returns empty placeholder files", async () => {
+    const projectPath = await mkdtemp(join(process.cwd(), "projects", "gameplay-code-fallback-test-"));
+    createdDirectories.push(projectPath);
+    await mkdir(join(projectPath, "src"));
+    await writeFile(join(projectPath, "src", "game3d.ts"), "export const oldCode = true;", "utf8");
+    const provider = {
+      kind: "codex-only",
+      generateCode: vi.fn(async () => ({
+        code: "export const generatedFromCode = true;",
+        explanation: "Returned source in the code field",
+        files: [{ path: "src/game3d.ts", content: "" }],
+      })),
+    } as unknown as IProvider;
+
+    const result = await new GameplayDeveloper(provider).writeCode(plan, projectPath);
+
+    expect(result.files).toEqual(["src/game3d.ts"]);
+    expect(await readFile(join(projectPath, "src", "game3d.ts"), "utf8"))
+      .toContain("generatedFromCode = true");
+  });
+
   it("rejects a gameplay response that escapes src", async () => {
     const projectPath = await mkdtemp(join(process.cwd(), "projects", "gameplay-path-test-"));
     createdDirectories.push(projectPath);

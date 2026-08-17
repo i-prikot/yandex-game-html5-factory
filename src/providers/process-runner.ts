@@ -9,7 +9,7 @@ export interface ProcessResult {
 export type ProcessRunner = (
   command: string,
   args: readonly string[],
-  options: { cwd: string; timeoutMs: number; env?: NodeJS.ProcessEnv },
+  options: { cwd: string; timeoutMs: number; env?: NodeJS.ProcessEnv; stdin?: string },
 ) => Promise<ProcessResult>;
 
 export const runProcess: ProcessRunner = async (command, args, options) =>
@@ -18,7 +18,7 @@ export const runProcess: ProcessRunner = async (command, args, options) =>
       cwd: options.cwd,
       env: options.env ?? process.env,
       shell: false,
-      stdio: ["ignore", "pipe", "pipe"],
+      stdio: [options.stdin === undefined ? "ignore" : "pipe", "pipe", "pipe"],
     });
     let stdout = "";
     let stderr = "";
@@ -31,14 +31,17 @@ export const runProcess: ProcessRunner = async (command, args, options) =>
       }
     }, options.timeoutMs);
 
-    child.stdout.setEncoding("utf8");
-    child.stderr.setEncoding("utf8");
-    child.stdout.on("data", (chunk: string) => {
+    child.stdout?.setEncoding("utf8");
+    child.stderr?.setEncoding("utf8");
+    child.stdout?.on("data", (chunk: string) => {
       stdout += chunk;
     });
-    child.stderr.on("data", (chunk: string) => {
+    child.stderr?.on("data", (chunk: string) => {
       stderr += chunk;
     });
+    if (options.stdin !== undefined) {
+      child.stdin?.end(options.stdin);
+    }
     child.on("error", (error) => {
       if (!isSettled) {
         isSettled = true;
