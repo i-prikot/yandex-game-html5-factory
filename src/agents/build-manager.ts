@@ -20,7 +20,14 @@ export interface BuildManagerOptions {
 }
 
 const logger = createLogger("agent-build-manager");
-const SECRET_ENV_NAMES = ["GOOGLE_API_KEY", "XAI_API_KEY", "TRIPO3D_API_KEY", "ANTHROPIC_API_KEY", "OPENAI_API_KEY"];
+const SECRET_ENV_NAMES = [
+  "GOOGLE_API_KEY",
+  "XAI_API_KEY",
+  "TRIPO3D_API_KEY",
+  "ANTHROPIC_API_KEY",
+  "OPENAI_API_KEY",
+  "CRS_OAI_KEY",
+];
 
 async function listFiles(directory: string): Promise<string[]> {
   const entries = await readdir(directory, { withFileTypes: true });

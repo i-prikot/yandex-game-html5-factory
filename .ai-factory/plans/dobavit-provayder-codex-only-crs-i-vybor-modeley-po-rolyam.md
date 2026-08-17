@@ -47,41 +47,41 @@ CRS (Custom REST Service) OpenAI-compatible proxy. The API key is sourced exclus
 
 ## Section 3 — Update src/providers/factory.ts
 
-- [ ] Extend `ProviderSelection` to `"auto" | "claude" | "codex" | "codex-only"`.
-- [ ] Add `codexOnly: IProvider` field to the `ProviderCandidates` interface.
-- [ ] Import `CodexOnlyProvider` from `"./codex-only.js"` and add `codexOnly: new CodexOnlyProvider()` to the default `candidates` object.
-- [ ] In `createProvider`, add handling for `selection === "codex-only"`: await `candidates.codexOnly.isAvailable()`; return the provider when available; throw `new ProviderUnavailableError("codex-only", "CRS_OAI_KEY is not set or codex CLI is unavailable")` otherwise. Do NOT add `codex-only` to the auto-selection chain.
+- [x] Extend `ProviderSelection` to `"auto" | "claude" | "codex" | "codex-only"`.
+- [x] Add `codexOnly: IProvider` field to the `ProviderCandidates` interface.
+- [x] Import `CodexOnlyProvider` from `"./codex-only.js"` and add `codexOnly: new CodexOnlyProvider()` to the default `candidates` object.
+- [x] In `createProvider`, add handling for `selection === "codex-only"`: await `candidates.codexOnly.isAvailable()`; return the provider when available; throw `new ProviderUnavailableError("codex-only", "CRS_OAI_KEY is not set or codex CLI is unavailable")` otherwise. Do NOT add `codex-only` to the auto-selection chain.
 
 ---
 
 ## Section 4 — Update src/providers/index.ts
 
-- [ ] Add `export * from "./codex-only.js";` to `src/providers/index.ts`.
+- [x] Add `export * from "./codex-only.js";` to `src/providers/index.ts`.
 
 ---
 
 ## Section 5 — Update src/cli/prompts.ts
 
-- [ ] Add `"codex-only"` to the `providerSchema` `z.enum([...])` call.
-- [ ] Add `{ name: "Codex only (CRS proxy)", value: "codex-only" as const }` to the interactive select choices array, after the existing `"codex"` entry.
+- [x] Add `"codex-only"` to the `providerSchema` `z.enum([...])` call.
+- [x] Add `{ name: "Codex only (CRS proxy)", value: "codex-only" as const }` to the interactive select choices array, after the existing `"codex"` entry.
 
 ---
 
 ## Section 6 — Update src/pipeline/orchestrator.ts
 
-- [ ] Add `"codex-only"` to the provider allowlist array in `FactoryPipeline.run` (the array currently contains `"auto"`, `"claude"`, `"codex"`).
+- [x] Add `"codex-only"` to the provider allowlist array in `FactoryPipeline.run` (the array currently contains `"auto"`, `"claude"`, `"codex"`).
 
 ---
 
 ## Section 7 — Update src/agents/build-manager.ts
 
-- [ ] Add `"CRS_OAI_KEY"` to the `SECRET_ENV_NAMES` array so `assertNoSecrets()` catches accidental inclusion of the key in generated `dist/` files and ZIP archives.
+- [x] Add `"CRS_OAI_KEY"` to the `SECRET_ENV_NAMES` array so `assertNoSecrets()` catches accidental inclusion of the key in generated `dist/` files and ZIP archives.
 
 ---
 
 ## Section 8 — Update .env.example
 
-- [ ] Append the following block to `.env.example`:
+- [x] Append the following block to `.env.example`:
   ```
   CRS_OAI_KEY=
   CODEX_ONLY_MODEL_DEFAULT=gpt-5.4
@@ -95,7 +95,7 @@ CRS (Custom REST Service) OpenAI-compatible proxy. The API key is sourced exclus
 
 ## Section 9 — Update docker-compose.yml
 
-- [ ] Add the following entries to the `environment` section of `docker-compose.yml`:
+- [x] Add the following entries to the `environment` section of `docker-compose.yml`:
   ```yaml
   CRS_OAI_KEY: ${CRS_OAI_KEY:-}
   CODEX_ONLY_MODEL_DEFAULT: ${CODEX_ONLY_MODEL_DEFAULT:-gpt-5.4}

@@ -88,7 +88,7 @@ export class FactoryPipeline {
     };
     try {
       const selection = providerSelection.toLowerCase();
-      if (!(["auto", "claude", "codex"] as string[]).includes(selection)) {
+      if (!(["auto", "claude", "codex", "codex-only"] as string[]).includes(selection)) {
         throw new Error(`Unknown provider selection: ${providerSelection}`);
       }
       progress("provider", "started", "Selecting host agent");

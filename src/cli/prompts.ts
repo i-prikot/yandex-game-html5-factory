@@ -7,7 +7,7 @@ const logger = createLogger("cli-prompts");
 
 export const gameTypeSchema = z.enum(["auto", "2d", "3d"]);
 export const qualitySchema = z.enum(["auto", "LOW", "MEDIUM", "HIGH"]);
-export const providerSchema = z.enum(["auto", "claude", "codex"]);
+export const providerSchema = z.enum(["auto", "claude", "codex", "codex-only"]);
 
 export const createGameInputSchema = z.object({
   name: z.string().trim().min(2).max(80),
@@ -71,6 +71,7 @@ export async function collectCreateGameInput(): Promise<CreateGameInput> {
       { name: "AUTO", value: "auto" as const },
       { name: "Claude Code", value: "claude" as const },
       { name: "Codex", value: "codex" as const },
+      { name: "Codex only (CRS proxy)", value: "codex-only" as const },
     ],
   });
 
