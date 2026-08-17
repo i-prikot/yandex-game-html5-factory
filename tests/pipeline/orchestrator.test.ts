@@ -18,7 +18,7 @@ describe("FactoryPipeline", () => {
     createdDirectories.push(projectPath);
     const calls: string[] = [];
     const progress: PipelineProgress[] = [];
-    const provider = { kind: "codex" } as IProvider;
+    const provider = { kind: "codex-only" } as IProvider;
     const pipeline = new FactoryPipeline({
       selectProvider: async () => { calls.push("provider"); return provider; },
       createPlanner: () => ({ analyze: async () => {
@@ -43,10 +43,11 @@ describe("FactoryPipeline", () => {
       } }),
     });
 
-    const result = await pipeline.run("Make an arcade game", "LOW", "codex", { onProgress: (event) => progress.push(event) });
+    const result = await pipeline.run("Make an arcade game", "LOW", "codex-only", { onProgress: (event) => progress.push(event) });
 
     expect(calls).toEqual(["provider", "planner", "architect", "assets", "gameplay", "repair", "build"]);
     expect(result.production.packagePath).toContain("game.zip");
+    expect(result.provider).toBe("codex-only");
     expect(progress.some((event) => event.stage === "visual-test" && event.status === "completed")).toBe(true);
     expect(progress.at(-1)).toMatchObject({ stage: "production-build", status: "completed" });
   });

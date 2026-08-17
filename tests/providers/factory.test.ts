@@ -17,23 +17,47 @@ describe("createProvider", () => {
   it("prefers Claude when both providers are available", async () => {
     const claude = mockProvider("claude", true);
     const codex = mockProvider("codex", true);
+    const codexOnly = mockProvider("codex-only", true);
 
-    await expect(createProvider("auto", { claude, codex })).resolves.toBe(claude);
+    await expect(createProvider("auto", { claude, codex, codexOnly })).resolves.toBe(claude);
     expect(codex.isAvailable).not.toHaveBeenCalled();
+    expect(codexOnly.isAvailable).not.toHaveBeenCalled();
   });
 
   it("falls back to Codex in auto mode", async () => {
     const claude = mockProvider("claude", false);
     const codex = mockProvider("codex", true);
+    const codexOnly = mockProvider("codex-only", true);
 
-    await expect(createProvider("auto", { claude, codex })).resolves.toBe(codex);
+    await expect(createProvider("auto", { claude, codex, codexOnly })).resolves.toBe(codex);
+    expect(codexOnly.isAvailable).not.toHaveBeenCalled();
   });
 
   it("does not change an explicit unavailable selection", async () => {
     const claude = mockProvider("claude", true);
     const codex = mockProvider("codex", false);
+    const codexOnly = mockProvider("codex-only", true);
 
-    await expect(createProvider("codex", { claude, codex })).rejects.toThrow("codex provider is unavailable");
+    await expect(createProvider("codex", { claude, codex, codexOnly })).rejects.toThrow("codex provider is unavailable");
     expect(claude.isAvailable).not.toHaveBeenCalled();
+  });
+
+  it("returns an available explicit Codex-only provider", async () => {
+    const claude = mockProvider("claude", false);
+    const codex = mockProvider("codex", false);
+    const codexOnly = mockProvider("codex-only", true);
+
+    await expect(createProvider("codex-only", { claude, codex, codexOnly })).resolves.toBe(codexOnly);
+  });
+
+  it("rejects an unavailable explicit Codex-only provider", async () => {
+    const claude = mockProvider("claude", true);
+    const codex = mockProvider("codex", true);
+    const codexOnly = mockProvider("codex-only", false);
+
+    await expect(createProvider("codex-only", { claude, codex, codexOnly }))
+      .rejects.toThrow("codex-only provider is unavailable");
+    expect(claude.isAvailable).not.toHaveBeenCalled();
+    expect(codex.isAvailable).not.toHaveBeenCalled();
   });
 });

@@ -112,25 +112,25 @@ CRS (Custom REST Service) OpenAI-compatible proxy. The API key is sourced exclus
 
 Create `tests/providers/codex-only.test.ts` using the same mock/spy pattern as `tests/providers/codex.test.ts`:
 
-- [ ] Test: `generateCode` produces an args array containing `"--model"` immediately followed by the resolved model string.
-- [ ] Test: when `CODEX_ONLY_MODEL_GAME_PLANNER` is set to a non-empty string, a request with `context.role = "GamePlanner"` uses that value as the model.
-- [ ] Test: `resolveModel` falls back to `CODEX_ONLY_MODEL_DEFAULT` (and ultimately to `"gpt-5.4"`) when no role-specific env var is set.
-- [ ] Test: `isAvailable()` returns `false` when `CRS_OAI_KEY` is absent from the environment, even if the mock runner returns `exitCode === 0`.
-- [ ] Test: `isAvailable()` returns `true` when mock runner returns `exitCode === 0` AND `CRS_OAI_KEY` is a non-empty string.
-- [ ] Test: the args array passed to the runner contains no occurrence of the `CRS_OAI_KEY` value at any position.
-- [ ] Test: the `env` object passed to the runner contains `CODEX_HOME` equal to the configured `codexHomePath`.
-- [ ] Test: `prepareCodexHome()` writes both `config.toml` and `auth.json` inside `codexHomePath` before the runner is invoked (assert via `writeFile` mock or by checking fs state before runner callback).
-- [ ] Test: a valid JSONL fixture (same format as `codex.test.ts`) is parsed and returned as a correctly typed `CodeResponse`.
-- [ ] Test: `analyzeScreenshot` includes `--image <path>` in args and deletes the temp image in `finally` even when the runner throws.
+- [x] Test: `generateCode` produces an args array containing `"--model"` immediately followed by the resolved model string.
+- [x] Test: when `CODEX_ONLY_MODEL_GAME_PLANNER` is set to a non-empty string, a request with `context.role = "GamePlanner"` uses that value as the model.
+- [x] Test: `resolveModel` falls back to `CODEX_ONLY_MODEL_DEFAULT` (and ultimately to `"gpt-5.4"`) when no role-specific env var is set.
+- [x] Test: `isAvailable()` returns `false` when `CRS_OAI_KEY` is absent from the environment, even if the mock runner returns `exitCode === 0`.
+- [x] Test: `isAvailable()` returns `true` when mock runner returns `exitCode === 0` AND `CRS_OAI_KEY` is a non-empty string.
+- [x] Test: the args array passed to the runner contains no occurrence of the `CRS_OAI_KEY` value at any position.
+- [x] Test: the `env` object passed to the runner contains `CODEX_HOME` equal to the configured `codexHomePath`.
+- [x] Test: `prepareCodexHome()` writes both `config.toml` and `auth.json` inside `codexHomePath` before the runner is invoked (assert via `writeFile` mock or by checking fs state before runner callback).
+- [x] Test: a valid JSONL fixture (same format as `codex.test.ts`) is parsed and returned as a correctly typed `CodeResponse`.
+- [x] Test: `analyzeScreenshot` includes `--image <path>` in args and deletes the temp image in `finally` even when the runner throws.
 
 ---
 
 ## Section 11 — Update existing tests
 
-- [ ] `tests/providers/factory.test.ts`: add test — `createProvider("codex-only", candidates)` where `candidates.codexOnly.isAvailable()` resolves `true` returns `candidates.codexOnly`.
-- [ ] `tests/providers/factory.test.ts`: add test — `createProvider("codex-only", candidates)` where `candidates.codexOnly.isAvailable()` resolves `false` throws `ProviderUnavailableError`.
-- [ ] `tests/acceptance/providers.test.ts`: add acceptance case — `createProvider("codex-only", mockCandidates)` resolves to a provider with `kind === "codex-only"`.
-- [ ] `tests/cli/prompts.test.ts`: add test verifying that `parseCreateGameInput({ provider: "codex-only", ... })` passes `providerSchema` validation without throwing.
+- [x] `tests/providers/factory.test.ts`: add test — `createProvider("codex-only", candidates)` where `candidates.codexOnly.isAvailable()` resolves `true` returns `candidates.codexOnly`.
+- [x] `tests/providers/factory.test.ts`: add test — `createProvider("codex-only", candidates)` where `candidates.codexOnly.isAvailable()` resolves `false` throws `ProviderUnavailableError`.
+- [x] `tests/acceptance/providers.test.ts`: add acceptance case — `createProvider("codex-only", mockCandidates)` resolves to a provider with `kind === "codex-only"`.
+- [x] `tests/cli/prompts.test.ts`: add test verifying that `parseCreateGameInput({ provider: "codex-only", ... })` passes `providerSchema` validation without throwing.
 
 ---
 

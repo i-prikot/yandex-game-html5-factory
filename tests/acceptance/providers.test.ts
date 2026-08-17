@@ -19,7 +19,11 @@ describe("host agent provider acceptance", () => {
       : { exitCode: 0, stdout: JSON.stringify({ result: JSON.stringify(response) }), stderr: "" });
     const provider = new ClaudeCodeProvider({ runner, sleep: async () => undefined });
 
-    const selected = await createProvider("claude", { claude: provider, codex: {} as IProvider });
+    const selected = await createProvider("claude", {
+      claude: provider,
+      codex: {} as IProvider,
+      codexOnly: {} as IProvider,
+    });
     const generated = await selected.generateCode("Create gameplay", { projectPath: process.cwd(), role: "GameplayDeveloper" });
 
     expect(selected.kind).toBe("claude");
@@ -36,10 +40,32 @@ describe("host agent provider acceptance", () => {
         });
     const provider = new CodexProvider({ runner });
 
-    const selected = await createProvider("codex", { claude: {} as IProvider, codex: provider });
+    const selected = await createProvider("codex", {
+      claude: {} as IProvider,
+      codex: provider,
+      codexOnly: {} as IProvider,
+    });
     const generated = await selected.generateCode("Create gameplay", { projectPath: process.cwd(), role: "GameplayDeveloper" });
 
     expect(selected.kind).toBe("codex");
     expect(generated.files[0]?.path).toBe("src/game.ts");
+  });
+
+  it("selects Codex-only explicitly without adding it to auto detection", async () => {
+    const codexOnly = {
+      kind: "codex-only",
+      isAvailable: vi.fn(async () => true),
+      generateCode: vi.fn(),
+      analyzeScreenshot: vi.fn(),
+      fixBug: vi.fn(),
+    } satisfies IProvider;
+
+    const selected = await createProvider("codex-only", {
+      claude: {} as IProvider,
+      codex: {} as IProvider,
+      codexOnly,
+    });
+
+    expect(selected.kind).toBe("codex-only");
   });
 });

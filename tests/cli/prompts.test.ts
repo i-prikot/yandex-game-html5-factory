@@ -32,4 +32,14 @@ describe("parseCreateGameInput", () => {
       }),
     ).toThrow("Invalid game configuration");
   });
+
+  it("accepts codex-only as an explicit provider", () => {
+    expect(() => parseCreateGameInput({
+      name: "CRS Game",
+      description: "Create a game through the CRS proxy.",
+      type: "2d",
+      quality: "MEDIUM",
+      provider: "codex-only",
+    })).not.toThrow();
+  });
 });
