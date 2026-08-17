@@ -36,7 +36,7 @@ interface CodexProviderOptions {
   runner?: ProcessRunner;
 }
 
-function extractAgentMessage(output: string): string {
+export function extractAgentMessage(output: string): string {
   const lines = output.split(/\r?\n/u).filter(Boolean);
   let lastMessage = "";
   for (const line of lines) {

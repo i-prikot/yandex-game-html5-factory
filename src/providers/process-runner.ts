@@ -9,14 +9,14 @@ export interface ProcessResult {
 export type ProcessRunner = (
   command: string,
   args: readonly string[],
-  options: { cwd: string; timeoutMs: number },
+  options: { cwd: string; timeoutMs: number; env?: NodeJS.ProcessEnv },
 ) => Promise<ProcessResult>;
 
 export const runProcess: ProcessRunner = async (command, args, options) =>
   new Promise<ProcessResult>((resolve, reject) => {
     const child = spawn(command, args, {
       cwd: options.cwd,
-      env: process.env,
+      env: options.env ?? process.env,
       shell: false,
       stdio: ["ignore", "pipe", "pipe"],
     });

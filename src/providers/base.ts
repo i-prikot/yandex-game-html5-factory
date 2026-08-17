@@ -1,4 +1,4 @@
-export type ProviderKind = "claude" | "codex";
+export type ProviderKind = "claude" | "codex" | "codex-only";
 
 export interface ProviderContext {
   projectPath: string;
