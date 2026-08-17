@@ -38,6 +38,11 @@ export function parseCreateGameInput(value: unknown): CreateGameInput {
   return result.data;
 }
 
+export function resolveProviderDefault(value: string | undefined): CreateGameInput["provider"] {
+  const result = providerSchema.safeParse(value?.toLowerCase());
+  return result.success ? result.data : "auto";
+}
+
 export async function collectCreateGameInput(): Promise<CreateGameInput> {
   logger.info("Starting interactive game configuration");
   const name = await input({
@@ -67,6 +72,7 @@ export async function collectCreateGameInput(): Promise<CreateGameInput> {
   });
   const provider = await select({
     message: "AI agent:",
+    default: resolveProviderDefault(process.env.AI_PROVIDER),
     choices: [
       { name: "AUTO", value: "auto" as const },
       { name: "Claude Code", value: "claude" as const },

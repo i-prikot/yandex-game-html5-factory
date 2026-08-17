@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseCreateGameInput } from "../../src/cli/prompts.js";
+import { parseCreateGameInput, resolveProviderDefault } from "../../src/cli/prompts.js";
 
 describe("parseCreateGameInput", () => {
   it("normalizes valid user input", () => {
@@ -41,5 +41,11 @@ describe("parseCreateGameInput", () => {
       quality: "MEDIUM",
       provider: "codex-only",
     })).not.toThrow();
+  });
+
+  it("uses AI_PROVIDER=codex-only as the interactive default", () => {
+    expect(resolveProviderDefault("codex-only")).toBe("codex-only");
+    expect(resolveProviderDefault("CODEX-ONLY")).toBe("codex-only");
+    expect(resolveProviderDefault("unsupported")).toBe("auto");
   });
 });
