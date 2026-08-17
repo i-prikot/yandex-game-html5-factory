@@ -11,6 +11,7 @@ import type {
   FixResponse,
   IProvider,
   ProviderContext,
+  ProviderRequestOptions,
 } from "./base.js";
 import { ProviderResponseError, ProviderUnavailableError } from "./base.js";
 import { extractAgentMessage } from "./codex.js";
@@ -59,7 +60,7 @@ const ROLE_MODEL_ENV_NAMES: Readonly<Record<string, string>> = {
   BugFixer: "CODEX_ONLY_MODEL_BUG_FIXER",
   VisualReviewer: "CODEX_ONLY_MODEL_VISUAL_REVIEWER",
 };
-const DEFAULT_TIMEOUT_MS = 300_000;
+const DEFAULT_TIMEOUT_MS = 180_000;
 
 function resolveTimeoutMs(value: string | undefined): number {
   const timeoutMs = Number(value?.trim());
@@ -112,11 +113,17 @@ export class CodexOnlyProvider implements IProvider {
     }
   }
 
-  public async generateCode(prompt: string, context: ProviderContext): Promise<CodeResponse> {
+  public async generateCode(
+    prompt: string,
+    context: ProviderContext,
+    options: ProviderRequestOptions = {},
+  ): Promise<CodeResponse> {
     return this.request(
       `${this.systemContext(context)}\n${prompt}\nReturn only JSON: {"code":"", "explanation":"", "files":[{"path":"", "content":""}]}.`,
       context,
       codeResponseSchema,
+      undefined,
+      options.timeoutMs,
     );
   }
 
@@ -179,6 +186,7 @@ export class CodexOnlyProvider implements IProvider {
     context: ProviderContext,
     schema: z.ZodType<T>,
     imagePath?: string,
+    timeoutOverrideMs?: number,
   ): Promise<T> {
     await this.prepareCodexHome();
     if (!(await this.isAvailable())) {
@@ -207,15 +215,16 @@ export class CodexOnlyProvider implements IProvider {
       CODEX_HOME: this.codexHomePath,
       CRS_OAI_KEY: process.env.CRS_OAI_KEY ?? "",
     };
+    const effectiveTimeoutMs = timeoutOverrideMs ?? this.timeoutMs;
     this.logger.info("Requesting Codex-only", {
       role: context.role,
       model,
-      timeoutMs: this.timeoutMs,
+      timeoutMs: effectiveTimeoutMs,
       hasImage: Boolean(imagePath),
     });
     const result = await this.runner(this.command, args, {
       cwd: context.projectPath,
-      timeoutMs: this.timeoutMs,
+      timeoutMs: effectiveTimeoutMs,
       env: runnerEnv,
       stdin: prompt,
     });

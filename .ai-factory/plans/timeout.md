@@ -119,23 +119,23 @@ The timeout occurs in the `gameplay` stage, after planning and scaffolding compl
 
 ### Phase 3: Provider Timeout Configuration
 
-- [ ] **Task 3.1: Add per-phase timeout configuration**
-  - [ ] Modify `src/providers/codex.ts` and `src/providers/codex-only.ts` to accept per-request timeout override
-  - [ ] Change `generateCode()` signature: add optional `timeoutMs` parameter
-  - [ ] Update `CodexProvider` and `CodexOnlyProvider` to pass timeout to `runProcess`
-  - [ ] Default remains 180000ms (3 minutes) for backward compatibility, but phases use 90000ms (1.5 minutes)
-  - [ ] **Files:** `src/providers/codex.ts` (modify), `src/providers/codex-only.ts` (modify), `src/providers/base.ts` (modify interface)
-  - [ ] **Logging:** `DEBUG` log effective timeout for each request
-  - [ ] **Tests:** Unit test timeout override in both providers
+- [x] **Task 3.1: Add per-phase timeout configuration**
+  - [x] Modify `src/providers/codex.ts` and `src/providers/codex-only.ts` to accept per-request timeout override
+  - [x] Change `generateCode()` signature: add optional `timeoutMs` parameter
+  - [x] Update `CodexProvider` and `CodexOnlyProvider` to pass timeout to `runProcess`
+  - [x] Default remains 180000ms (3 minutes) for backward compatibility, but phases use 90000ms (1.5 minutes)
+  - [x] **Files:** `src/providers/codex.ts` (modify), `src/providers/codex-only.ts` (modify), `src/providers/base.ts` (modify interface)
+  - [x] **Logging:** `DEBUG` log effective timeout for each request
+  - [x] **Tests:** Unit test timeout override in both providers
 
-- [ ] **Task 3.2: Add timeout monitoring and early warnings**
-  - [ ] Track elapsed time per phase in `PhaseOrchestrator`
-  - [ ] If a phase exceeds 75% of its timeout budget, log `WARN` with phase name and elapsed time
-  - [ ] Emit progress events: `onPhaseProgress(phase, elapsedMs, timeoutMs)` for CLI feedback
-  - [ ] Add timeout metrics to pipeline manifest: `.factory/pipeline-result.json` includes `phaseTimings`
-  - [ ] **Files:** `src/agents/phase-orchestrator.ts` (modify), `src/pipeline/orchestrator.ts` (modify)
-  - [ ] **Logging:** `WARN` at 75% timeout threshold, `INFO` at phase completion with timing
-  - [ ] **Tests:** Test timeout warning triggers at correct threshold
+- [x] **Task 3.2: Add timeout monitoring and early warnings**
+  - [x] Track elapsed time per phase in `PhaseOrchestrator`
+  - [x] If a phase exceeds 75% of its timeout budget, log `WARN` with phase name and elapsed time
+  - [x] Emit progress events: `onPhaseProgress(phase, elapsedMs, timeoutMs)` for CLI feedback
+  - [x] Add timeout metrics to pipeline manifest: `.factory/pipeline-result.json` includes `phaseTimings`
+  - [x] **Files:** `src/agents/phase-orchestrator.ts` (modify), `src/pipeline/orchestrator.ts` (modify)
+  - [x] **Logging:** `WARN` at 75% timeout threshold, `INFO` at phase completion with timing
+  - [x] **Tests:** Test timeout warning triggers at correct threshold
 
 **Blocked by:** Task 2.1
 
@@ -257,10 +257,10 @@ refactor(gameplay): integrate phased generation into GameplayDeveloper
 ```
 feat(providers): add per-phase timeout configuration
 
-- [ ] Add timeoutMs parameter to generateCode() interface
-- [ ] Implement timeout monitoring and early warnings
-- [ ] Emit progress events for CLI feedback
-- [ ] Add timeout metrics to pipeline manifest
+- [x] Add timeoutMs parameter to generateCode() interface
+- [x] Implement timeout monitoring and early warnings
+- [x] Emit progress events for CLI feedback
+- [x] Add timeout metrics to pipeline manifest
 ```
 
 **Checkpoint 4** (After Phase 4 - Task 4.1, 4.2):

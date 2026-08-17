@@ -50,7 +50,7 @@ afterEach(async () => {
 });
 
 describe("CodexOnlyProvider", () => {
-  it("uses a five-minute request timeout by default", async () => {
+  it("uses a three-minute request timeout by default", async () => {
     let requestTimeoutMs: number | undefined;
     const runner: ProcessRunner = vi.fn(async (_command, args, options) => {
       if (args[0] === "--version") return { exitCode: 0, stdout: "codex 1", stderr: "" };
@@ -61,7 +61,7 @@ describe("CodexOnlyProvider", () => {
 
     await provider.generateCode("Create gameplay", { projectPath: process.cwd(), role: "GameplayDeveloper" });
 
-    expect(requestTimeoutMs).toBe(300_000);
+    expect(requestTimeoutMs).toBe(180_000);
   });
 
   it("uses CODEX_ONLY_TIMEOUT_MS for request timeouts", async () => {
@@ -96,6 +96,26 @@ describe("CodexOnlyProvider", () => {
     await provider.generateCode("Create gameplay", { projectPath: process.cwd(), role: "GameplayDeveloper" });
 
     expect(requestTimeoutMs).toBe(15_000);
+  });
+
+  it("uses a per-request timeout override without changing the configured default", async () => {
+    vi.stubEnv("CODEX_ONLY_TIMEOUT_MS", "420000");
+    const requestTimeouts: number[] = [];
+    const runner: ProcessRunner = vi.fn(async (_command, args, options) => {
+      if (args[0] === "--version") return { exitCode: 0, stdout: "codex 1", stderr: "" };
+      requestTimeouts.push(options.timeoutMs);
+      return { exitCode: 0, stdout: jsonlResponse(codeResponse), stderr: "" };
+    });
+    const provider = new CodexOnlyProvider({ runner, codexHomePath: await createCodexHome() });
+
+    await provider.generateCode(
+      "Create one gameplay phase",
+      { projectPath: process.cwd(), role: "GameplayDeveloper" },
+      { timeoutMs: 90_000 },
+    );
+    await provider.generateCode("Create plan", { projectPath: process.cwd(), role: "GamePlanner" });
+
+    expect(requestTimeouts).toEqual([90_000, 420_000]);
   });
 
   it("passes the resolved model immediately after --model", async () => {

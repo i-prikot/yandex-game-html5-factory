@@ -63,6 +63,9 @@ describe("PhaseOrchestrator", () => {
       .executePhases(phases, plan, projectPath, provider);
 
     expect(observedCode).toEqual(["export const initial = true;", "export const revision = 1;"]);
+    expect((provider.generateCode as ReturnType<typeof vi.fn>).mock.calls.every((call) => (
+      call[2] as { timeoutMs: number }
+    ).timeoutMs === 90_000)).toBe(true);
     expect(result.completedPhases).toEqual(["scene", "combat"]);
     expect(result.code).toBe("export const revision = 2;");
     const backups = await readdir(backupDirectory);
@@ -129,5 +132,32 @@ describe("PhaseOrchestrator", () => {
     ]);
     expect(await readFile(join(projectPath, "src", "game3d.ts"), "utf8")).toContain("fixed = true");
     expect(await readFile(join(projectPath, ".factory", "phase-validation.json"), "utf8")).toContain("TS1005");
+  });
+
+  it("emits progress and warns after 75 percent of the request budget", async () => {
+    const projectPath = await createProject();
+    const progress: number[] = [];
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const provider = {
+      kind: "codex",
+      generateCode: vi.fn(async () => {
+        await new Promise((resolveDelay) => setTimeout(resolveDelay, 85));
+        return { code: "export const monitored = true;", explanation: "done", files: [] };
+      }),
+    } as unknown as IProvider;
+
+    await new PhaseOrchestrator({
+      runner: passingRunner,
+      phaseRequestTimeoutMs: 100,
+      hardTimeoutMs: 200,
+      onPhaseProgress: (_phase, elapsedMs, timeoutMs) => {
+        expect(timeoutMs).toBe(100);
+        progress.push(elapsedMs);
+      },
+    }).executePhases([phases[0]!], plan, projectPath, provider);
+
+    expect(progress[0]).toBe(0);
+    expect(progress.some((elapsedMs) => elapsedMs >= 75)).toBe(true);
+    expect(warnSpy.mock.calls.flat().join(" ")).toContain("75% of its timeout budget");
   });
 });

@@ -11,6 +11,7 @@ import { buildPhasePrompt } from "./phase-prompts.js";
 
 const DEFAULT_HARD_TIMEOUT_MS = 120_000;
 const DEFAULT_VALIDATION_TIMEOUT_MS = 5_000;
+const PHASE_REQUEST_TIMEOUT_MS = 90_000;
 const BACKUP_RETENTION_MS = 24 * 60 * 60 * 1_000;
 
 export interface PhaseTiming {
@@ -42,9 +43,11 @@ export interface PhaseValidationResult {
 
 export interface PhaseOrchestratorOptions {
   hardTimeoutMs?: number;
+  phaseRequestTimeoutMs?: number;
   validationTimeoutMs?: number;
   now?: () => number;
   runner?: ProcessRunner;
+  onPhaseProgress?: (phase: GameplayPhase, elapsedMs: number, timeoutMs: number) => void;
 }
 
 export class GameplayPhaseExecutionError extends Error {
@@ -81,15 +84,19 @@ function selectReplacement(response: CodeResponse, targetModule: string): string
 
 export class PhaseOrchestrator {
   private readonly hardTimeoutMs: number;
+  private readonly phaseRequestTimeoutMs: number;
   private readonly validationTimeoutMs: number;
   private readonly now: () => number;
   private readonly runner: ProcessRunner;
+  private readonly onPhaseProgress?: PhaseOrchestratorOptions["onPhaseProgress"];
 
   public constructor(options: PhaseOrchestratorOptions = {}) {
     this.hardTimeoutMs = options.hardTimeoutMs ?? DEFAULT_HARD_TIMEOUT_MS;
+    this.phaseRequestTimeoutMs = options.phaseRequestTimeoutMs ?? PHASE_REQUEST_TIMEOUT_MS;
     this.validationTimeoutMs = options.validationTimeoutMs ?? DEFAULT_VALIDATION_TIMEOUT_MS;
     this.now = options.now ?? Date.now;
     this.runner = options.runner ?? runProcess;
+    this.onPhaseProgress = options.onPhaseProgress;
   }
 
   public async executePhases(
@@ -266,8 +273,9 @@ export class PhaseOrchestrator {
           phaseCount,
           retry: Boolean(validationFeedback),
         },
-      }),
+      }, { timeoutMs: this.phaseRequestTimeoutMs }),
       phase,
+      this.phaseRequestTimeoutMs,
     );
   }
 
@@ -398,10 +406,18 @@ export class PhaseOrchestrator {
     logger.debug("Phase validation manifest written", { path, resultCount: validationResults.length });
   }
 
-  private async withTimeout<T>(operation: Promise<T>, phase: GameplayPhase): Promise<T> {
-    let timer: NodeJS.Timeout | undefined;
+  private async withTimeout<T>(
+    operation: Promise<T>,
+    phase: GameplayPhase,
+    requestTimeoutMs: number,
+  ): Promise<T> {
+    const startedMs = this.now();
+    let hardTimeoutTimer: NodeJS.Timeout | undefined;
+    let warningTimer: NodeJS.Timeout | undefined;
+    let progressTimer: NodeJS.Timeout | undefined;
+    const warningThresholdMs = Math.floor(requestTimeoutMs * 0.75);
     const timeout = new Promise<never>((_resolve, reject) => {
-      timer = setTimeout(() => {
+      hardTimeoutTimer = setTimeout(() => {
         logger.warn("Gameplay phase exceeded hard timeout", {
           phase: phase.name,
           timeoutMs: this.hardTimeoutMs,
@@ -409,10 +425,30 @@ export class PhaseOrchestrator {
         reject(new Error(`phase timed out after ${this.hardTimeoutMs}ms`));
       }, this.hardTimeoutMs);
     });
+    this.onPhaseProgress?.(phase, 0, requestTimeoutMs);
+    warningTimer = setTimeout(() => {
+      const elapsedMs = Math.max(0, this.now() - startedMs);
+      logger.warn("Gameplay phase consumed 75% of its timeout budget", {
+        phase: phase.name,
+        elapsedMs,
+        timeoutMs: requestTimeoutMs,
+        thresholdMs: warningThresholdMs,
+      });
+      this.onPhaseProgress?.(phase, elapsedMs, requestTimeoutMs);
+    }, warningThresholdMs);
+    if (this.onPhaseProgress) {
+      const intervalMs = Math.min(1_000, Math.max(10, Math.floor(requestTimeoutMs / 4)));
+      progressTimer = setInterval(() => {
+        this.onPhaseProgress?.(phase, Math.max(0, this.now() - startedMs), requestTimeoutMs);
+      }, intervalMs);
+    }
     try {
       return await Promise.race([operation, timeout]);
     } finally {
-      if (timer) clearTimeout(timer);
+      if (hardTimeoutTimer) clearTimeout(hardTimeoutTimer);
+      if (warningTimer) clearTimeout(warningTimer);
+      if (progressTimer) clearInterval(progressTimer);
+      this.onPhaseProgress?.(phase, Math.max(0, this.now() - startedMs), requestTimeoutMs);
     }
   }
 }

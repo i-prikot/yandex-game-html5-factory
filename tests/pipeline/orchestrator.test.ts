@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -19,6 +19,14 @@ describe("FactoryPipeline", () => {
     const calls: string[] = [];
     const progress: PipelineProgress[] = [];
     const provider = { kind: "codex-only" } as IProvider;
+    const phaseTimings = [{
+      name: "scaffold",
+      startedAt: "2026-08-17T00:00:00.000Z",
+      completedAt: "2026-08-17T00:00:01.000Z",
+      durationMs: 1_000,
+      timeoutMs: 90_000,
+      status: "completed" as const,
+    }];
     const pipeline = new FactoryPipeline({
       selectProvider: async () => { calls.push("provider"); return provider; },
       createPlanner: () => ({ analyze: async () => {
@@ -27,7 +35,10 @@ describe("FactoryPipeline", () => {
       } }),
       createArchitect: () => ({ scaffold: async () => { calls.push("architect"); return projectPath; } }),
       createAssetManager: () => ({ resolveAssets: async () => { calls.push("assets"); return { assets: [], fallbackCount: 0 }; } }),
-      createGameplayDeveloper: () => ({ writeCode: async () => { calls.push("gameplay"); return { files: [], explanation: "" }; } }),
+      createGameplayDeveloper: () => ({ writeCode: async () => {
+        calls.push("gameplay");
+        return { files: [], explanation: "", phaseTimings };
+      } }),
       createRepairLoop: () => ({ run: async () => {
         calls.push("repair");
         return {
@@ -48,7 +59,12 @@ describe("FactoryPipeline", () => {
     expect(calls).toEqual(["provider", "planner", "architect", "assets", "gameplay", "repair", "build"]);
     expect(result.production.packagePath).toContain("game.zip");
     expect(result.provider).toBe("codex-only");
+    expect(result.phaseTimings).toEqual(phaseTimings);
     expect(progress.some((event) => event.stage === "visual-test" && event.status === "completed")).toBe(true);
     expect(progress.at(-1)).toMatchObject({ stage: "production-build", status: "completed" });
+    const manifest = JSON.parse(
+      await readFile(join(projectPath, ".factory", "pipeline-result.json"), "utf8"),
+    ) as { phaseTimings: unknown };
+    expect(manifest.phaseTimings).toEqual(phaseTimings);
   });
 });

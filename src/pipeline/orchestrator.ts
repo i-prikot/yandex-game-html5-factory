@@ -5,6 +5,8 @@ import { BuildManager, type ProductionPackage } from "../agents/build-manager.js
 import { GameArchitect } from "../agents/game-architect.js";
 import { GamePlanner, type GamePlan } from "../agents/game-planner.js";
 import { GameplayDeveloper } from "../agents/gameplay-developer.js";
+import type { GameplayPhase } from "../agents/gameplay-phases.js";
+import { PhaseOrchestrator, type PhaseOrchestratorOptions, type PhaseTiming } from "../agents/phase-orchestrator.js";
 import { createAssetManager } from "../asset-pipeline/index.js";
 import type { AssetManager } from "../asset-pipeline/manager.js";
 import type { AssetResolutionReport } from "../asset-pipeline/types.js";
@@ -36,6 +38,7 @@ export interface PipelineRunOptions {
   title?: string;
   type?: "auto" | "2d" | "3d";
   onProgress?: (event: PipelineProgress) => void;
+  onPhaseProgress?: (phase: GameplayPhase, elapsedMs: number, timeoutMs: number) => void;
 }
 
 export interface FactoryPipelineResult {
@@ -45,6 +48,7 @@ export interface FactoryPipelineResult {
   validation: RepairLoopResult;
   production: ProductionPackage;
   provider: string;
+  phaseTimings: PhaseTiming[];
 }
 
 interface PipelineDependencies {
@@ -52,7 +56,10 @@ interface PipelineDependencies {
   createPlanner: (provider: IProvider) => Pick<GamePlanner, "analyze">;
   createArchitect: () => Pick<GameArchitect, "scaffold">;
   createAssetManager: () => Pick<AssetManager, "resolveAssets">;
-  createGameplayDeveloper: (provider: IProvider) => Pick<GameplayDeveloper, "writeCode">;
+  createGameplayDeveloper: (
+    provider: IProvider,
+    options?: PhaseOrchestratorOptions,
+  ) => Pick<GameplayDeveloper, "writeCode">;
   createRepairLoop: (provider: IProvider) => Pick<SelfRepairLoop, "run">;
   createBuildManager: () => Pick<BuildManager, "buildForYandex">;
 }
@@ -62,7 +69,9 @@ const defaultDependencies: PipelineDependencies = {
   createPlanner: (provider) => new GamePlanner(provider),
   createArchitect: () => new GameArchitect(),
   createAssetManager,
-  createGameplayDeveloper: (provider) => new GameplayDeveloper(provider),
+  createGameplayDeveloper: (provider, options = {}) => (
+    new GameplayDeveloper(provider, new PhaseOrchestrator(options))
+  ),
   createRepairLoop: (provider) => new SelfRepairLoop(provider),
   createBuildManager: () => new BuildManager(),
 };
@@ -111,7 +120,12 @@ export class FactoryPipeline {
       progress("assets", "completed", `${assets.assets.length} assets resolved; ${assets.fallbackCount} procedural`);
 
       progress("gameplay", "started", "Generating gameplay, controls and rules");
-      await this.dependencies.createGameplayDeveloper(provider).writeCode(plan, projectPath);
+      const phaseOrchestratorOptions: PhaseOrchestratorOptions = {
+        ...(options.onPhaseProgress ? { onPhaseProgress: options.onPhaseProgress } : {}),
+      };
+      const gameplay = await this.dependencies
+        .createGameplayDeveloper(provider, phaseOrchestratorOptions)
+        .writeCode(plan, projectPath);
       progress("gameplay", "completed", "Gameplay source generated");
 
       progress("browser-test", "started", "Building and running the game in Chromium");
@@ -132,6 +146,7 @@ export class FactoryPipeline {
         validation,
         production,
         provider: provider.kind,
+        phaseTimings: gameplay.phaseTimings,
       };
       await this.writeManifest(join(projectPath, ".factory", "pipeline-result.json"), {
         status: "completed",
@@ -139,6 +154,7 @@ export class FactoryPipeline {
         plan,
         packagePath: production.packagePath,
         validationIterations: validation.iterations.length,
+        phaseTimings: gameplay.phaseTimings,
       });
       return result;
     } catch (error) {

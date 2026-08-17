@@ -8,6 +8,10 @@ export interface ProviderContext {
   metadata?: Readonly<Record<string, string | number | boolean>>;
 }
 
+export interface ProviderRequestOptions {
+  timeoutMs?: number;
+}
+
 export interface CodeResponse {
   code: string;
   explanation: string;
@@ -36,7 +40,11 @@ export interface IProvider {
 
   isAvailable(): Promise<boolean>;
 
-  generateCode(prompt: string, context: ProviderContext): Promise<CodeResponse>;
+  generateCode(
+    prompt: string,
+    context: ProviderContext,
+    options?: ProviderRequestOptions,
+  ): Promise<CodeResponse>;
 
   analyzeScreenshot(imageBase64: string, context: ProviderContext): Promise<AnalysisResponse>;
 

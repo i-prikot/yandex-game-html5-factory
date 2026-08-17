@@ -10,6 +10,7 @@ import type {
   FixResponse,
   IProvider,
   ProviderContext,
+  ProviderRequestOptions,
 } from "./base.js";
 import { ProviderResponseError, ProviderUnavailableError } from "./base.js";
 import { runProcess, type ProcessRunner } from "./process-runner.js";
@@ -88,11 +89,17 @@ export class CodexProvider implements IProvider {
     }
   }
 
-  public async generateCode(prompt: string, context: ProviderContext): Promise<CodeResponse> {
+  public async generateCode(
+    prompt: string,
+    context: ProviderContext,
+    options: ProviderRequestOptions = {},
+  ): Promise<CodeResponse> {
     return this.request(
       `${this.systemContext(context)}\n${prompt}\nReturn only JSON: {"code":"", "explanation":"", "files":[{"path":"", "content":""}]}.`,
       context,
       codeResponseSchema,
+      undefined,
+      options.timeoutMs,
     );
   }
 
@@ -131,6 +138,7 @@ export class CodexProvider implements IProvider {
     context: ProviderContext,
     schema: z.ZodType<T>,
     imagePath?: string,
+    timeoutOverrideMs?: number,
   ): Promise<T> {
     if (!(await this.isAvailable())) {
       throw new ProviderUnavailableError(this.kind, `command '${this.command}' was not found or failed`);
@@ -142,10 +150,15 @@ export class CodexProvider implements IProvider {
     }
     args.push(prompt);
 
-    this.logger.info("Requesting Codex", { role: context.role, hasImage: Boolean(imagePath) });
+    const effectiveTimeoutMs = timeoutOverrideMs ?? this.timeoutMs;
+    this.logger.info("Requesting Codex", {
+      role: context.role,
+      hasImage: Boolean(imagePath),
+      timeoutMs: effectiveTimeoutMs,
+    });
     const result = await this.runner(this.command, args, {
       cwd: context.projectPath,
-      timeoutMs: this.timeoutMs,
+      timeoutMs: effectiveTimeoutMs,
     });
     if (result.exitCode !== 0) {
       const error = new Error(`Codex exited with ${result.exitCode}: ${result.stderr.slice(-1_000)}`);
