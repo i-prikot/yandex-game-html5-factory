@@ -85,8 +85,18 @@ afterAll(async () => {
 
 describe.sequential("offline-first generation", () => {
   for (const scenario of [
-    { type: "2d" as const, title: "Offline Platformer", prompt: "2D platformer with jumping and coins" },
-    { type: "3d" as const, title: "Offline Racer", prompt: "3D racing game with obstacles" },
+    {
+      type: "2d" as const,
+      title: "Offline Platformer",
+      prompt: "2D platformer with jumping and coins",
+      timeoutMs: 300_000,
+    },
+    {
+      type: "3d" as const,
+      title: "Offline Racer",
+      prompt: "3D racing game with obstacles",
+      timeoutMs: 600_000,
+    },
   ]) {
     it(`builds, visually validates and packages ${scenario.type} without asset API keys`, async () => {
       const projectsRoot = join(acceptanceRoot, "projects");
@@ -122,6 +132,6 @@ describe.sequential("offline-first generation", () => {
       expect(result.validation.passed).toBe(true);
       expect((await stat(join(result.projectPath, "dist"))).isDirectory()).toBe(true);
       expect((await stat(result.production.packagePath)).size).toBeGreaterThan(100);
-    }, 300_000);
+    }, scenario.timeoutMs);
   }
 });

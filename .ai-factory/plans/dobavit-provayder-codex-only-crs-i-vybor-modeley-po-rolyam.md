@@ -7,9 +7,9 @@
 
 ## Settings
 
-- [ ] Testing: yes
-- [ ] Logging: verbose
-- [ ] Docs: yes
+- [x] Testing: yes
+- [x] Logging: verbose
+- [x] Docs: yes
 
 ## Overview
 
@@ -145,23 +145,23 @@ Create `tests/providers/codex-only.test.ts` using the same mock/spy pattern as `
 
 ## Commit Plan
 
-- [ ] **Commit 1 — Core types and provider** (after Sections 1–2):
+- [x] **Commit 1 — Core types and provider** (after Sections 1–2):
   `feat(providers): add codex-only ProviderKind, ProcessRunner env, export extractAgentMessage, CodexOnlyProvider`
 
-- [ ] **Commit 2 — Integration wiring** (after Sections 3–9):
+- [x] **Commit 2 — Integration wiring** (after Sections 3–9):
   `feat(providers): wire codex-only into factory, CLI, orchestrator, secret guard, env, Docker`
 
-- [ ] **Commit 3 — Tests** (after Sections 10–11):
+- [x] **Commit 3 — Tests** (after Sections 10–11):
   `test(providers): codex-only unit tests; update factory, acceptance, prompts tests`
 
-- [ ] **Commit 4 — Docs** (after Section 12):
+- [x] **Commit 4 — Docs** (after Section 12):
   `docs: document codex-only provider and CRS env vars in README`
 
 ---
 
 ## Verification
 
-- [ ] Run `npm run typecheck` from project root — must complete with zero type errors.
-- [ ] Run `npm test` — all suites must pass, including the new `tests/providers/codex-only.test.ts`.
-- [ ] Manual smoke: `AI_PROVIDER=codex-only CRS_OAI_KEY=<key> npm run cli` — CLI must accept `codex-only` as a valid provider choice and attempt to invoke `CodexOnlyProvider`.
-- [ ] Secret guard: run `npm run build`; confirm `BuildManager.assertNoSecrets()` would flag any accidental inclusion of `CRS_OAI_KEY` value in `dist/` output (verified by the addition to `SECRET_ENV_NAMES`).
+- [x] Run `npm run typecheck` from project root — must complete with zero type errors.
+- [x] Run `npm test` — all suites must pass, including the new `tests/providers/codex-only.test.ts`.
+- [x] Manual smoke: `AI_PROVIDER=codex-only CRS_OAI_KEY=<key> npm run cli` — CLI must accept `codex-only` as a valid provider choice and attempt to invoke `CodexOnlyProvider`.
+- [x] Secret guard: run `npm run build`; confirm `BuildManager.assertNoSecrets()` would flag any accidental inclusion of `CRS_OAI_KEY` value in `dist/` output (verified by the addition to `SECRET_ENV_NAMES`).
