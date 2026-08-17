@@ -5,8 +5,13 @@ import { BuildManager, type ProductionPackage } from "../agents/build-manager.js
 import { GameArchitect } from "../agents/game-architect.js";
 import { GamePlanner, type GamePlan } from "../agents/game-planner.js";
 import { GameplayDeveloper } from "../agents/gameplay-developer.js";
-import type { GameplayPhase } from "../agents/gameplay-phases.js";
-import { PhaseOrchestrator, type PhaseOrchestratorOptions, type PhaseTiming } from "../agents/phase-orchestrator.js";
+import { resolveGameplayPhases, type GameplayPhase } from "../agents/gameplay-phases.js";
+import {
+  GameplayPhaseExecutionError,
+  PhaseOrchestrator,
+  type PhaseOrchestratorOptions,
+  type PhaseTiming,
+} from "../agents/phase-orchestrator.js";
 import { createAssetManager } from "../asset-pipeline/index.js";
 import type { AssetManager } from "../asset-pipeline/manager.js";
 import type { AssetResolutionReport } from "../asset-pipeline/types.js";
@@ -21,6 +26,7 @@ export type PipelineStage =
   | "architecture"
   | "assets"
   | "gameplay"
+  | `gameplay-phase-${number}`
   | "browser-test"
   | "visual-test"
   | "optimization"
@@ -89,6 +95,7 @@ export class FactoryPipeline {
   ): Promise<FactoryPipelineResult> {
     let projectPath: string | undefined;
     let currentStage: PipelineStage = "provider";
+    let phaseTimings: PhaseTiming[] = [];
     const progress = (stage: PipelineStage, status: PipelineProgress["status"], message: string): void => {
       currentStage = stage;
       const event = { stage, status, message, timestamp: new Date().toISOString() };
@@ -120,12 +127,31 @@ export class FactoryPipeline {
       progress("assets", "completed", `${assets.assets.length} assets resolved; ${assets.fallbackCount} procedural`);
 
       progress("gameplay", "started", "Generating gameplay, controls and rules");
+      const gameplayPhases = resolveGameplayPhases(plan.type);
+      const phaseNumbers = new Map(gameplayPhases.map((phase, index) => [phase.name, index + 1]));
+      const onPhaseProgress = (phase: GameplayPhase, elapsedMs: number, timeoutMs: number): void => {
+        const phaseNumber = phaseNumbers.get(phase.name) ?? 1;
+        progress(
+          `gameplay-phase-${phaseNumber}`,
+          "started",
+          `${phase.name} (${elapsedMs}ms / ${timeoutMs}ms budget)`,
+        );
+        options.onPhaseProgress?.(phase, elapsedMs, timeoutMs);
+      };
       const phaseOrchestratorOptions: PhaseOrchestratorOptions = {
-        ...(options.onPhaseProgress ? { onPhaseProgress: options.onPhaseProgress } : {}),
+        onPhaseProgress,
       };
       const gameplay = await this.dependencies
         .createGameplayDeveloper(provider, phaseOrchestratorOptions)
         .writeCode(plan, projectPath);
+      phaseTimings = gameplay.phaseTimings;
+      for (const [index, timing] of phaseTimings.entries()) {
+        progress(
+          `gameplay-phase-${index + 1}`,
+          timing.status === "completed" ? "completed" : "failed",
+          `${timing.name} completed in ${timing.durationMs}ms`,
+        );
+      }
       progress("gameplay", "completed", "Gameplay source generated");
 
       progress("browser-test", "started", "Building and running the game in Chromium");
@@ -146,7 +172,7 @@ export class FactoryPipeline {
         validation,
         production,
         provider: provider.kind,
-        phaseTimings: gameplay.phaseTimings,
+        phaseTimings,
       };
       await this.writeManifest(join(projectPath, ".factory", "pipeline-result.json"), {
         status: "completed",
@@ -154,16 +180,36 @@ export class FactoryPipeline {
         plan,
         packagePath: production.packagePath,
         validationIterations: validation.iterations.length,
-        phaseTimings: gameplay.phaseTimings,
+        phaseTimings,
       });
       return result;
     } catch (error) {
       progress(currentStage, "failed", error instanceof Error ? error.message : String(error));
       if (projectPath) {
+        if (error instanceof GameplayPhaseExecutionError) {
+          phaseTimings = [...error.phaseTimings];
+          await this.writeManifest(join(projectPath, ".factory", "phase-failure.json"), {
+            phase: error.phase.name,
+            error: error.message,
+            completedPhases: error.completedPhases,
+            phaseTimings,
+            codeSnapshot: error.partialCode,
+          }).catch((manifestError: unknown) => logger.error(
+            "Unable to write gameplay phase failure manifest",
+            manifestError,
+            { phase: error.phase.name, projectPath },
+          ));
+          logger.error("Gameplay phase failed with partial progress preserved", error, {
+            phase: error.phase.name,
+            completedPhases: error.completedPhases,
+            partialCodeBytes: error.partialCode.length,
+          });
+        }
         await this.writeManifest(join(projectPath, ".factory", "pipeline-result.json"), {
           status: "failed",
           stage: currentStage,
           error: error instanceof Error ? error.message : String(error),
+          phaseTimings,
         }).catch((manifestError: unknown) => logger.error("Unable to write pipeline failure manifest", manifestError));
       }
       logger.error("Factory pipeline failed", error, { stage: currentStage, projectPath });

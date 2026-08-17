@@ -96,4 +96,41 @@ describe("GameplayDeveloper", () => {
 
     await expect(createDeveloper(provider).writeCode(plan, projectPath)).rejects.toThrow("may replace only src/game3d.ts");
   });
+
+  it("resumes after the last sequentially completed phase", async () => {
+    const projectPath = await mkdtemp(join(process.cwd(), "projects", "gameplay-resume-test-"));
+    createdDirectories.push(projectPath);
+    await mkdir(join(projectPath, "src"));
+    await mkdir(join(projectPath, ".factory"));
+    await writeFile(join(projectPath, "src", "game3d.ts"), "export const cameraReady = true;", "utf8");
+    await writeFile(join(projectPath, ".factory", "gameplay-phases.json"), `${JSON.stringify({
+      status: "failed",
+      completedPhases: ["scene-setup", "camera-controls"],
+      phaseTimings: [],
+      validationResults: [],
+      failedPhase: "player-entity",
+    })}\n`, "utf8");
+    const provider = {
+      kind: "codex",
+      generateCode: vi.fn(async (_prompt: string, context: { metadata: { phase: string } }) => ({
+        code: `export const phase = '${context.metadata.phase}';`,
+        explanation: context.metadata.phase,
+        files: [],
+      })),
+    } as unknown as IProvider;
+
+    await createDeveloper(provider).writeCode(plan, projectPath);
+
+    expect(provider.generateCode).toHaveBeenCalledTimes(3);
+    expect((provider.generateCode as ReturnType<typeof vi.fn>).mock.calls.map((call) => (
+      call[1] as { metadata: { phase: string } }
+    ).metadata.phase)).toEqual(["player-entity", "game-mechanics", "optimization"]);
+    const manifest = JSON.parse(
+      await readFile(join(projectPath, ".factory", "gameplay-phases.json"), "utf8"),
+    ) as { status: string; completedPhases: string[] };
+    expect(manifest).toMatchObject({
+      status: "completed",
+      completedPhases: ["scene-setup", "camera-controls", "player-entity", "game-mechanics", "optimization"],
+    });
+  });
 });

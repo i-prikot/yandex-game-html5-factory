@@ -143,23 +143,23 @@ The timeout occurs in the `gameplay` stage, after planning and scaffolding compl
 
 ### Phase 4: Pipeline Integration and Error Handling
 
-- [ ] **Task 4.1: Update FactoryPipeline to handle phase failures**
-  - [ ] Modify `src/pipeline/orchestrator.ts` to catch phase-specific errors
-  - [ ] Add new progress substages: `gameplay-phase-1`, `gameplay-phase-2`, etc.
-  - [ ] On phase failure, write detailed error to `.factory/phase-failure.json`: phase name, error, code snapshot
-  - [ ] Preserve partial progress: even if phase 4/5 fails, phases 1-3 code is saved
-  - [ ] **Files:** `src/pipeline/orchestrator.ts` (modify)
-  - [ ] **Logging:** `INFO` for each phase substage, `ERROR` with phase context on failure
-  - [ ] **Tests:** Integration test: simulate phase failure, verify partial code preservation
+- [x] **Task 4.1: Update FactoryPipeline to handle phase failures**
+  - [x] Modify `src/pipeline/orchestrator.ts` to catch phase-specific errors
+  - [x] Add new progress substages: `gameplay-phase-1`, `gameplay-phase-2`, etc.
+  - [x] On phase failure, write detailed error to `.factory/phase-failure.json`: phase name, error, code snapshot
+  - [x] Preserve partial progress: even if phase 4/5 fails, phases 1-3 code is saved
+  - [x] **Files:** `src/pipeline/orchestrator.ts` (modify)
+  - [x] **Logging:** `INFO` for each phase substage, `ERROR` with phase context on failure
+  - [x] **Tests:** Integration test: simulate phase failure, verify partial code preservation
 
-- [ ] **Task 4.2: Add phase resume capability (stretch goal)**
-  - [ ] If pipeline fails mid-phase, allow resume from last completed phase
-  - [ ] Read `.factory/gameplay-phases.json` to detect completed phases
-  - [ ] Skip completed phases and continue from failure point
-  - [ ] Add CLI flag: `--resume-from-phase <phase-name>` (future enhancement, document for now)
-  - [ ] **Files:** `src/agents/phase-orchestrator.ts` (modify), document in code comments
-  - [ ] **Logging:** `INFO` when resuming, list skipped phases
-  - [ ] **Tests:** Manual test (acceptance test candidate for future)
+- [x] **Task 4.2: Add phase resume capability (stretch goal)**
+  - [x] If pipeline fails mid-phase, allow resume from last completed phase
+  - [x] Read `.factory/gameplay-phases.json` to detect completed phases
+  - [x] Skip completed phases and continue from failure point
+  - [x] Add CLI flag: `--resume-from-phase <phase-name>` (future enhancement, document for now)
+  - [x] **Files:** `src/agents/phase-orchestrator.ts` (modify), document in code comments
+  - [x] **Logging:** `INFO` when resuming, list skipped phases
+  - [x] **Tests:** Manual test (acceptance test candidate for future)
 
 **Blocked by:** Task 2.1, Task 2.2
 
@@ -267,10 +267,10 @@ feat(providers): add per-phase timeout configuration
 ```
 feat(pipeline): integrate phased gameplay into pipeline orchestrator
 
-- [ ] Add phase-specific progress substages
-- [ ] Implement detailed phase failure reporting
-- [ ] Preserve partial progress on failure
-- [ ] Document phase resume capability
+- [x] Add phase-specific progress substages
+- [x] Implement detailed phase failure reporting
+- [x] Preserve partial progress on failure
+- [x] Document phase resume capability
 ```
 
 **Checkpoint 5** (After Phase 5 - Task 5.1, 5.2, 5.3):
