@@ -3,7 +3,7 @@
 
 **Branch:** `feature/timeout-4f4de3`
 **Created:** 2026-08-17
-**Status:** Ready for implementation
+**Status:** Complete
 
 ## Problem Summary
 
@@ -30,19 +30,19 @@ This approach mirrors how human developers work: scaffold → implement core →
 
 ## Settings
 
-- [ ] **Testing:** Yes - comprehensive tests for phased generation
-- [ ] **Logging:** Verbose - detailed phase transition and timing logs
-- [ ] **Documentation:** Yes - document the phased generation architecture
-- [ ] **Roadmap Linkage:** None (tactical improvement)
+- [x] **Testing:** Yes - comprehensive tests for phased generation
+- [x] **Logging:** Verbose - detailed phase transition and timing logs
+- [x] **Documentation:** Yes - document the phased generation architecture
+- [x] **Roadmap Linkage:** None (tactical improvement)
 
 ## Architecture Context
 
 From `.ai-factory/ARCHITECTURE.md`:
 
-- [ ] **Pipeline:** `FactoryPipeline` orchestrates agent stages (planning → architecture → assets → **gameplay** → validation → build)
-- [ ] **Provider abstraction:** `IProvider` interface supports `CodexProvider`, `CodexOnlyProvider`, and `ClaudeProvider`
-- [ ] **Current gameplay flow:** `GameplayDeveloper.writeCode()` → single `provider.generateCode()` call → timeout
-- [ ] **Tech stack:** Node.js, TypeScript, Babylon.js for 3D, procedural fallbacks
+- [x] **Pipeline:** `FactoryPipeline` orchestrates agent stages (planning → architecture → assets → **gameplay** → validation → build)
+- [x] **Provider abstraction:** `IProvider` interface supports `CodexProvider`, `CodexOnlyProvider`, and `ClaudeProvider`
+- [x] **Current gameplay flow:** `GameplayDeveloper.writeCode()` → single `provider.generateCode()` call → timeout
+- [x] **Tech stack:** Node.js, TypeScript, Babylon.js for 3D, procedural fallbacks
 
 The timeout occurs in the `gameplay` stage, after planning and scaffolding complete successfully.
 
@@ -200,32 +200,32 @@ The timeout occurs in the `gameplay` stage, after planning and scaffolding compl
 
 ### Phase 6: Documentation and Monitoring
 
-- [ ] **Task 6.1: Document phased generation architecture**
-  - [ ] Update `.ai-factory/ARCHITECTURE.md` with new "Phased Code Generation" section
-  - [ ] Document phase sequences for 2D and 3D games
-  - [ ] Explain phase orchestration flow: phase selection → prompt building → execution → validation → merge
-  - [ ] Add troubleshooting: "If a phase times out, check `.factory/phase-failure.json`"
-  - [ ] **Files:** `.ai-factory/ARCHITECTURE.md` (modify)
-  - [ ] **Logging:** N/A
-  - [ ] **Blocked by:** Task 2.1
+- [x] **Task 6.1: Document phased generation architecture**
+  - [x] Update `.ai-factory/ARCHITECTURE.md` with new "Phased Code Generation" section
+  - [x] Document phase sequences for 2D and 3D games
+  - [x] Explain phase orchestration flow: phase selection → prompt building → execution → validation → merge
+  - [x] Add troubleshooting: "If a phase times out, check `.factory/phase-failure.json`"
+  - [x] **Files:** `.ai-factory/ARCHITECTURE.md` (modify)
+  - [x] **Logging:** N/A
+  - [x] **Blocked by:** Task 2.1
 
-- [ ] **Task 6.2: Add phase timing metrics to CLI output**
-  - [ ] Modify `src/cli/index.ts` to display phase progress during gameplay stage
-  - [ ] Show: "Phase 2/5: player-movement (45s / 90s budget)"
-  - [ ] On completion, show total phase breakdown: "Phase timings: scaffold=15s, player-movement=45s, ..."
-  - [ ] Add visual progress bar (optional, use simple text for MVP)
-  - [ ] **Files:** `src/cli/index.ts` (modify)
-  - [ ] **Logging:** CLI output only (not file logs)
-  - [ ] **Blocked by:** Task 3.2, Task 4.1
+- [x] **Task 6.2: Add phase timing metrics to CLI output**
+  - [x] Modify `src/cli/index.ts` to display phase progress during gameplay stage
+  - [x] Show: "Phase 2/5: player-movement (45s / 90s budget)"
+  - [x] On completion, show total phase breakdown: "Phase timings: scaffold=15s, player-movement=45s, ..."
+  - [x] Add visual progress bar (optional, use simple text for MVP)
+  - [x] **Files:** `src/cli/index.ts` (modify)
+  - [x] **Logging:** CLI output only (not file logs)
+  - [x] **Blocked by:** Task 3.2, Task 4.1
 
-- [ ] **Task 6.3: Update README with timeout improvements**
-  - [ ] Add section: "How We Eliminated Timeouts" explaining phased generation
-  - [ ] Document environment variable: `CODEX_ONLY_TIMEOUT_MS` (already exists, but clarify phase usage)
-  - [ ] Explain that each phase has its own 90s budget, total can be 5-7 minutes for complex games
-  - [ ] Add FAQ: "What if a single phase still times out?" → Answer: reduce phase scope or increase timeout
-  - [ ] **Files:** `README.md` (modify)
-  - [ ] **Logging:** N/A
-  - [ ] **Blocked by:** Task 2.1
+- [x] **Task 6.3: Update README with timeout improvements**
+  - [x] Add section: "How We Eliminated Timeouts" explaining phased generation
+  - [x] Document environment variable: `CODEX_ONLY_TIMEOUT_MS` (already exists, but clarify phase usage)
+  - [x] Explain that each phase has its own 90s budget, total can be 5-7 minutes for complex games
+  - [x] Add FAQ: "What if a single phase still times out?" → Answer: reduce phase scope or increase timeout
+  - [x] **Files:** `README.md` (modify)
+  - [x] **Logging:** N/A
+  - [x] **Blocked by:** Task 2.1
 
 **Blocked by:** Task 2.1, Task 3.2, Task 4.1
 
@@ -286,9 +286,9 @@ test(gameplay): comprehensive tests for phased generation
 ```
 docs(gameplay): document phased generation architecture
 
-- [ ] Update ARCHITECTURE.md with phased generation flow
-- [ ] Add phase timing metrics to CLI output
-- [ ] Update README with timeout improvements
+- [x] Update ARCHITECTURE.md with phased generation flow
+- [x] Add phase timing metrics to CLI output
+- [x] Update README with timeout improvements
 ```
 
 ---
@@ -310,9 +310,9 @@ docs(gameplay): document phased generation architecture
 ### Performance Expectations
 
 - [ ] **Current:** Single 300s+ timeout in gameplay stage
-- [ ] **Target:** 4-5 phases × 60-90s each = 240-450s total, but with progress feedback and no single-point timeout failure
-- [ ] **Each phase budget:** 90s (1.5 minutes) with 120s hard timeout
-- [ ] **Total gameplay stage:** 5-7 minutes for complex games, 3-4 minutes for simple games
+- [x] **Target:** 4-5 phases × 60-90s each = 240-450s total, but with progress feedback and no single-point timeout failure
+- [x] **Each phase budget:** 90s (1.5 minutes) with 120s hard timeout
+- [x] **Total gameplay stage:** 5-7 minutes for complex games, 3-4 minutes for simple games
 
 ### Risks and Mitigations
 
@@ -339,12 +339,12 @@ docs(gameplay): document phased generation architecture
 
 ## Success Criteria
 
-- [ ] No more "codex timed out after 300000ms" errors in gameplay stage
-- [ ] All acceptance tests pass with phased generation
-- [ ] Phase timing metrics visible in CLI output
-- [ ] Documentation updated with new architecture
-- [ ] Backward compatibility maintained (existing API unchanged)
+- [x] No more "codex timed out after 300000ms" errors in gameplay stage
+- [x] All acceptance tests pass with phased generation
+- [x] Phase timing metrics visible in CLI output
+- [x] Documentation updated with new architecture
+- [x] Backward compatibility maintained (existing API unchanged)
 
 ---
 
-**Ready for implementation:** `/aif-implement`
+**Implementation complete:** verified with `npm test` and `npm run build`

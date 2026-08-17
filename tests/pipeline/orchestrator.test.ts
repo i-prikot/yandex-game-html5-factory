@@ -62,7 +62,17 @@ describe("FactoryPipeline", () => {
     expect(result.provider).toBe("codex-only");
     expect(result.phaseTimings).toEqual(phaseTimings);
     expect(progress.some((event) => event.stage === "visual-test" && event.status === "completed")).toBe(true);
-    expect(progress.some((event) => event.stage === "gameplay-phase-1" && event.status === "completed")).toBe(true);
+    expect(progress).toContainEqual(expect.objectContaining({
+      stage: "gameplay-phase-1",
+      status: "completed",
+      phase: {
+        number: 1,
+        total: 4,
+        name: "scaffold",
+        elapsedMs: 1_000,
+        timeoutMs: 90_000,
+      },
+    }));
     expect(progress.at(-1)).toMatchObject({ stage: "production-build", status: "completed" });
     const manifest = JSON.parse(
       await readFile(join(projectPath, ".factory", "pipeline-result.json"), "utf8"),

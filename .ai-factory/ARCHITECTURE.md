@@ -338,6 +338,40 @@ export class YandexGamesAdapter {
 
 ---
 
+### 3.7. Phased Code Generation
+
+`GameplayDeveloper` no longer asks a provider to implement the whole game in one request. It resolves a game-type-specific sequence and delegates it to `PhaseOrchestrator`:
+
+- 2D: `scaffold` -> `player-movement` -> `game-logic` -> `ui-integration`
+- 3D: `scene-setup` -> `camera-controls` -> `player-entity` -> `game-mechanics` -> `optimization`
+
+Each phase receives a prompt of at most 1500 characters and a 90000ms provider request budget. The provider returns a complete replacement of the gameplay module, not a code fragment. Replacing full revisions avoids duplicate imports and declarations while still preserving the behavior accumulated by prior phases.
+
+The execution flow is:
+
+```text
+resolve phases -> build bounded prompt -> request full revision
+    -> validate TypeScript syntax -> atomically write revision
+    -> record timing and manifest -> continue to next phase
+```
+
+TypeScript syntax is checked in-process through the compiler API so validation does not repeatedly load the complete Babylon.js dependency graph. A syntax failure is returned to the same phase for one repair attempt. The normal repair/build pipeline still performs the full project-wide `tsc --noEmit` gate after gameplay generation.
+
+Before each revision, the previous file is stored under `.factory/backups/`. Successful phases are recorded in `.factory/gameplay-phases.json`, so a repeated gameplay run skips the valid sequential prefix and resumes at the first incomplete phase. Backups older than 24 hours are removed after successful completion.
+
+Operational artifacts:
+
+```text
+.factory/gameplay-phases.json    completed phases, status, and timings
+.factory/phase-validation.json  syntax validation attempts and diagnostics
+.factory/phase-failure.json     failed phase and last working code snapshot
+.factory/pipeline-result.json   pipeline result including phaseTimings
+```
+
+If a phase times out, inspect `.factory/phase-failure.json` first. A provider warning is emitted at 75% of its phase budget; the hard orchestrator fallback is 120000ms. The last validated revision remains on disk and can be resumed.
+
+---
+
 ## 4. Поддержка 2D и 3D
 
 Фабрика не делает 2D как "тяжёлое 3D с фиксированной камерой". 

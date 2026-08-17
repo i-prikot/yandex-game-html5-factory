@@ -23,8 +23,21 @@ The interactive create flow asks for title, description, 2D/3D mode, quality,
 and the host agent. The build command packages an existing generated project.`);
 }
 
-function printProgress(event: PipelineProgress): void {
+function formatSeconds(milliseconds: number): string {
+  const seconds = milliseconds / 1_000;
+  return `${seconds >= 10 ? Math.round(seconds) : seconds.toFixed(1)}s`;
+}
+
+export function printProgress(event: PipelineProgress): void {
   const marker = event.status === "started" ? "RUN" : event.status === "completed" ? "OK" : "FAIL";
+  if (event.phase) {
+    const suffix = event.status === "completed" ? "" : " budget";
+    console.log(
+      `[${marker}] Phase ${event.phase.number}/${event.phase.total}: ${event.phase.name} `
+      + `(${formatSeconds(event.phase.elapsedMs)} / ${formatSeconds(event.phase.timeoutMs)}${suffix})`,
+    );
+    return;
+  }
   console.log(`[${marker}] ${event.stage}: ${event.message}`);
 }
 
@@ -85,6 +98,9 @@ export async function runCli(args: string[]): Promise<number> {
   console.log(`\n[OK] Project: ${result.projectPath}`);
   console.log(`[OK] Package: ${result.production.packagePath}`);
   console.log(`[OK] Visual validation iterations: ${result.validation.iterations.length}`);
+  console.log(`[OK] Phase timings: ${result.phaseTimings.map((timing) => (
+    `${timing.name}=${formatSeconds(timing.durationMs)}`
+  )).join(", ")}`);
   return 0;
 }
 

@@ -38,6 +38,13 @@ export interface PipelineProgress {
   status: "started" | "completed" | "failed";
   message: string;
   timestamp: string;
+  phase?: {
+    number: number;
+    total: number;
+    name: string;
+    elapsedMs: number;
+    timeoutMs: number;
+  };
 }
 
 export interface PipelineRunOptions {
@@ -96,10 +103,21 @@ export class FactoryPipeline {
     let projectPath: string | undefined;
     let currentStage: PipelineStage = "provider";
     let phaseTimings: PhaseTiming[] = [];
-    const progress = (stage: PipelineStage, status: PipelineProgress["status"], message: string): void => {
+    const progress = (
+      stage: PipelineStage,
+      status: PipelineProgress["status"],
+      message: string,
+      phase?: PipelineProgress["phase"],
+    ): void => {
       currentStage = stage;
-      const event = { stage, status, message, timestamp: new Date().toISOString() };
-      logger[status === "failed" ? "warn" : "info"]("Pipeline stage update", event);
+      const event: PipelineProgress = {
+        stage,
+        status,
+        message,
+        timestamp: new Date().toISOString(),
+        ...(phase ? { phase } : {}),
+      };
+      logger[status === "failed" ? "warn" : "info"]("Pipeline stage update", { ...event });
       options.onProgress?.(event);
     };
     try {
@@ -135,6 +153,7 @@ export class FactoryPipeline {
           `gameplay-phase-${phaseNumber}`,
           "started",
           `${phase.name} (${elapsedMs}ms / ${timeoutMs}ms budget)`,
+          { number: phaseNumber, total: gameplayPhases.length, name: phase.name, elapsedMs, timeoutMs },
         );
         options.onPhaseProgress?.(phase, elapsedMs, timeoutMs);
       };
@@ -150,6 +169,13 @@ export class FactoryPipeline {
           `gameplay-phase-${index + 1}`,
           timing.status === "completed" ? "completed" : "failed",
           `${timing.name} completed in ${timing.durationMs}ms`,
+          {
+            number: index + 1,
+            total: gameplayPhases.length,
+            name: timing.name,
+            elapsedMs: timing.durationMs,
+            timeoutMs: timing.timeoutMs,
+          },
         );
       }
       progress("gameplay", "completed", "Gameplay source generated");
