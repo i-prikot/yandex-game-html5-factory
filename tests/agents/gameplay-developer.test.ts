@@ -5,9 +5,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { GameplayDeveloper } from "../../src/agents/gameplay-developer.js";
 import type { GamePlan } from "../../src/agents/game-planner.js";
-import { PhaseOrchestrator } from "../../src/agents/phase-orchestrator.js";
+import { PhaseOrchestrator, type PhaseSyntaxValidator } from "../../src/agents/phase-orchestrator.js";
 import type { IProvider } from "../../src/providers/base.js";
-import type { ProcessRunner } from "../../src/providers/process-runner.js";
 
 const createdDirectories: string[] = [];
 const plan: GamePlan = {
@@ -19,10 +18,10 @@ const plan: GamePlan = {
   assets: [],
   quality: "LOW",
 };
-const passingRunner: ProcessRunner = vi.fn(async () => ({ exitCode: 0, stdout: "", stderr: "" }));
+const passingValidator: PhaseSyntaxValidator = vi.fn(() => ({ passed: true, diagnostics: "" }));
 
 function createDeveloper(provider: IProvider): GameplayDeveloper {
-  return new GameplayDeveloper(provider, new PhaseOrchestrator({ runner: passingRunner }));
+  return new GameplayDeveloper(provider, new PhaseOrchestrator({ validator: passingValidator }));
 }
 
 afterEach(async () => {

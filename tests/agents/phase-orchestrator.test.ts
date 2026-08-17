@@ -6,11 +6,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   GameplayPhaseExecutionError,
   PhaseOrchestrator,
+  type PhaseSyntaxValidator,
 } from "../../src/agents/phase-orchestrator.js";
 import type { GamePlan } from "../../src/agents/game-planner.js";
 import type { GameplayPhase } from "../../src/agents/gameplay-phases.js";
 import type { IProvider } from "../../src/providers/base.js";
-import type { ProcessRunner } from "../../src/providers/process-runner.js";
 
 const createdDirectories: string[] = [];
 const plan: GamePlan = {
@@ -26,7 +26,7 @@ const phases: GameplayPhase[] = [
   { name: "scene", scope: "Create the scene", dependencies: [], estimatedTimeMs: 10_000 },
   { name: "combat", scope: "Add combat", dependencies: ["scene"], estimatedTimeMs: 10_000 },
 ];
-const passingRunner: ProcessRunner = vi.fn(async () => ({ exitCode: 0, stdout: "", stderr: "" }));
+const passingValidator: PhaseSyntaxValidator = vi.fn(() => ({ passed: true, diagnostics: "" }));
 
 afterEach(async () => {
   await Promise.all(createdDirectories.splice(0).map((directory) => rm(directory, { recursive: true, force: true })));
@@ -59,7 +59,7 @@ describe("PhaseOrchestrator", () => {
       }),
     } as unknown as IProvider;
 
-    const result = await new PhaseOrchestrator({ runner: passingRunner })
+    const result = await new PhaseOrchestrator({ validator: passingValidator })
       .executePhases(phases, plan, projectPath, provider);
 
     expect(observedCode).toEqual(["export const initial = true;", "export const revision = 1;"]);
@@ -86,7 +86,7 @@ describe("PhaseOrchestrator", () => {
     } as unknown as IProvider;
 
     await expect(
-      new PhaseOrchestrator({ hardTimeoutMs: 5, runner: passingRunner })
+      new PhaseOrchestrator({ hardTimeoutMs: 5, validator: passingValidator })
         .executePhases([phases[0]!], plan, projectPath, provider),
     ).rejects.toThrow("phase timed out after 5ms");
   });
@@ -100,7 +100,7 @@ describe("PhaseOrchestrator", () => {
         .mockRejectedValueOnce(new Error("provider failed")),
     } as unknown as IProvider;
 
-    const operation = new PhaseOrchestrator({ runner: passingRunner })
+    const operation = new PhaseOrchestrator({ validator: passingValidator })
       .executePhases(phases, plan, projectPath, provider);
 
     await expect(operation).rejects.toMatchObject({
@@ -112,9 +112,9 @@ describe("PhaseOrchestrator", () => {
 
   it("retries once with TypeScript diagnostics and records both validation attempts", async () => {
     const projectPath = await createProject();
-    const runner: ProcessRunner = vi.fn()
-      .mockResolvedValueOnce({ exitCode: 2, stdout: "src/game3d.ts(1,1): error TS1005", stderr: "" })
-      .mockResolvedValueOnce({ exitCode: 0, stdout: "", stderr: "" });
+    const validator: PhaseSyntaxValidator = vi.fn()
+      .mockResolvedValueOnce({ passed: false, diagnostics: "src/game3d.ts(1,1): error TS1005" })
+      .mockResolvedValueOnce({ passed: true, diagnostics: "" });
     const provider = {
       kind: "codex",
       generateCode: vi.fn()
@@ -122,7 +122,8 @@ describe("PhaseOrchestrator", () => {
         .mockResolvedValueOnce({ code: "export const fixed = true;", explanation: "fixed", files: [] }),
     } as unknown as IProvider;
 
-    const result = await new PhaseOrchestrator({ runner }).executePhases([phases[0]!], plan, projectPath, provider);
+    const result = await new PhaseOrchestrator({ validator })
+      .executePhases([phases[0]!], plan, projectPath, provider);
 
     expect(provider.generateCode).toHaveBeenCalledTimes(2);
     expect((provider.generateCode as ReturnType<typeof vi.fn>).mock.calls[1]?.[0]).toContain("TS1005");
@@ -147,7 +148,7 @@ describe("PhaseOrchestrator", () => {
     } as unknown as IProvider;
 
     await new PhaseOrchestrator({
-      runner: passingRunner,
+      validator: passingValidator,
       phaseRequestTimeoutMs: 100,
       hardTimeoutMs: 200,
       onPhaseProgress: (_phase, elapsedMs, timeoutMs) => {
@@ -159,5 +160,23 @@ describe("PhaseOrchestrator", () => {
     expect(progress[0]).toBe(0);
     expect(progress.some((elapsedMs) => elapsedMs >= 75)).toBe(true);
     expect(warnSpy.mock.calls.flat().join(" ")).toContain("75% of its timeout budget");
+  });
+
+  it("uses the TypeScript compiler to reject invalid phase syntax", async () => {
+    const projectPath = await createProject();
+    const provider = {
+      kind: "codex",
+      generateCode: vi.fn()
+        .mockResolvedValueOnce({ code: "export const = ;", explanation: "invalid", files: [] })
+        .mockResolvedValueOnce({ code: "export const valid = true;", explanation: "fixed", files: [] }),
+    } as unknown as IProvider;
+
+    const result = await new PhaseOrchestrator().executePhases([phases[0]!], plan, projectPath, provider);
+
+    expect(provider.generateCode).toHaveBeenCalledTimes(2);
+    expect(result.validationResults).toMatchObject([
+      { attempt: 1, passed: false },
+      { attempt: 2, passed: true },
+    ]);
   });
 });

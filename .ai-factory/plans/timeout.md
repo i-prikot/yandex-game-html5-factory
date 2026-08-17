@@ -167,32 +167,32 @@ The timeout occurs in the `gameplay` stage, after planning and scaffolding compl
 
 ### Phase 5: Testing and Validation
 
-- [ ] **Task 5.1: Add acceptance test for phased generation**
-  - [ ] Create `tests/acceptance/phased-gameplay.test.ts`
-  - [ ] Test scenario: generate 3D game with mocked provider, verify all phases execute without timeout
-  - [ ] Mock provider returns minimal valid code for each phase
-  - [ ] Assert: total execution time < 300000ms, all phases complete, final game file is valid TypeScript
-  - [ ] **Files:** `tests/acceptance/phased-gameplay.test.ts` (new)
-  - [ ] **Logging:** Test logs phase timings
-  - [ ] **Blocked by:** Task 2.1, Task 4.1
+- [x] **Task 5.1: Add acceptance test for phased generation**
+  - [x] Create `tests/acceptance/phased-gameplay.test.ts`
+  - [x] Test scenario: generate 3D game with mocked provider, verify all phases execute without timeout
+  - [x] Mock provider returns minimal valid code for each phase
+  - [x] Assert: total execution time < 300000ms, all phases complete, final game file is valid TypeScript
+  - [x] **Files:** `tests/acceptance/phased-gameplay.test.ts` (new)
+  - [x] **Logging:** Test logs phase timings
+  - [x] **Blocked by:** Task 2.1, Task 4.1
 
-- [ ] **Task 5.2: Add unit tests for phase system**
-  - [ ] Test `gameplay-phases.ts`: phase validation, sequence generation for 2D/3D
-  - [ ] Test `phase-orchestrator.ts`: phase execution order, rollback, timeout handling
-  - [ ] Test `phase-prompts.ts`: prompt generation, size limits, constraint injection
-  - [ ] Achieve >80% code coverage for new modules
-  - [ ] **Files:** `tests/agents/gameplay-phases.test.ts` (new), `tests/agents/phase-orchestrator.test.ts` (new), `tests/agents/phase-prompts.test.ts` (new)
-  - [ ] **Logging:** Test runner logs
-  - [ ] **Blocked by:** Task 1.1, Task 1.2, Task 1.3
+- [x] **Task 5.2: Add unit tests for phase system**
+  - [x] Test `gameplay-phases.ts`: phase validation, sequence generation for 2D/3D
+  - [x] Test `phase-orchestrator.ts`: phase execution order, rollback, timeout handling
+  - [x] Test `phase-prompts.ts`: prompt generation, size limits, constraint injection
+  - [x] Achieve >80% code coverage for new modules
+  - [x] **Files:** `tests/agents/gameplay-phases.test.ts` (new), `tests/agents/phase-orchestrator.test.ts` (new), `tests/agents/phase-prompts.test.ts` (new)
+  - [x] **Logging:** Test runner logs
+  - [x] **Blocked by:** Task 1.1, Task 1.2, Task 1.3
 
-- [ ] **Task 5.3: Regression test - verify existing games still work**
-  - [ ] Run existing acceptance tests with phased generation enabled
-  - [ ] Test 2D game generation: `tests/acceptance/2d-game-no-api-keys.test.ts`
-  - [ ] Test 3D game generation: `tests/acceptance/3d-game-no-api-keys.test.ts`
-  - [ ] Assert: games still build successfully, visual validation passes, no regressions
-  - [ ] **Files:** Existing test files (no modification)
-  - [ ] **Logging:** Standard test logs
-  - [ ] **Blocked by:** Task 2.1, Task 4.1
+- [x] **Task 5.3: Regression test - verify existing games still work**
+  - [x] Run existing acceptance tests with phased generation enabled
+  - [x] Test 2D game generation: `tests/acceptance/2d-game-no-api-keys.test.ts`
+  - [x] Test 3D game generation: `tests/acceptance/3d-game-no-api-keys.test.ts`
+  - [x] Assert: games still build successfully, visual validation passes, no regressions
+  - [x] **Files:** Existing test files (no modification)
+  - [x] **Logging:** Standard test logs
+  - [x] **Blocked by:** Task 2.1, Task 4.1
 
 **Blocked by:** Task 2.1, Task 2.2, Task 4.1
 
@@ -277,9 +277,9 @@ feat(pipeline): integrate phased gameplay into pipeline orchestrator
 ```
 test(gameplay): comprehensive tests for phased generation
 
-- [ ] Add acceptance test for phased gameplay
-- [ ] Add unit tests for phase system components
-- [ ] Verify no regressions in existing game generation
+- [x] Add acceptance test for phased gameplay
+- [x] Add unit tests for phase system components
+- [x] Verify no regressions in existing game generation
 ```
 
 **Checkpoint 6** (After Phase 6 - Task 6.1, 6.2, 6.3):

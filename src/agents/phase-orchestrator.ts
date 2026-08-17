@@ -2,15 +2,17 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, readdir, rename, stat, unlink, writeFile } from "node:fs/promises";
 import { basename, dirname, resolve } from "node:path";
 
+import ts from "typescript";
+
 import { createLogger } from "../core/logger.js";
 import type { CodeResponse, IProvider } from "../providers/base.js";
-import { runProcess, type ProcessRunner } from "../providers/process-runner.js";
 import type { GamePlan } from "./game-planner.js";
 import type { GameplayPhase } from "./gameplay-phases.js";
 import { buildPhasePrompt } from "./phase-prompts.js";
 
 const DEFAULT_HARD_TIMEOUT_MS = 120_000;
-const DEFAULT_VALIDATION_TIMEOUT_MS = 5_000;
+const DEFAULT_VALIDATION_TIMEOUT_MS = 15_000;
+const VALIDATION_TARGET_MS = 5_000;
 const PHASE_REQUEST_TIMEOUT_MS = 90_000;
 const BACKUP_RETENTION_MS = 24 * 60 * 60 * 1_000;
 
@@ -46,9 +48,19 @@ export interface PhaseOrchestratorOptions {
   phaseRequestTimeoutMs?: number;
   validationTimeoutMs?: number;
   now?: () => number;
-  runner?: ProcessRunner;
+  validator?: PhaseSyntaxValidator;
   onPhaseProgress?: (phase: GameplayPhase, elapsedMs: number, timeoutMs: number) => void;
 }
+
+export interface PhaseSyntaxValidation {
+  passed: boolean;
+  diagnostics: string;
+}
+
+export type PhaseSyntaxValidator = (
+  code: string,
+  fileName: string,
+) => Promise<PhaseSyntaxValidation> | PhaseSyntaxValidation;
 
 export class GameplayPhaseExecutionError extends Error {
   public readonly cause: unknown;
@@ -87,7 +99,7 @@ export class PhaseOrchestrator {
   private readonly phaseRequestTimeoutMs: number;
   private readonly validationTimeoutMs: number;
   private readonly now: () => number;
-  private readonly runner: ProcessRunner;
+  private readonly validator: PhaseSyntaxValidator;
   private readonly onPhaseProgress?: PhaseOrchestratorOptions["onPhaseProgress"];
 
   public constructor(options: PhaseOrchestratorOptions = {}) {
@@ -95,7 +107,7 @@ export class PhaseOrchestrator {
     this.phaseRequestTimeoutMs = options.phaseRequestTimeoutMs ?? PHASE_REQUEST_TIMEOUT_MS;
     this.validationTimeoutMs = options.validationTimeoutMs ?? DEFAULT_VALIDATION_TIMEOUT_MS;
     this.now = options.now ?? Date.now;
-    this.runner = options.runner ?? runProcess;
+    this.validator = options.validator ?? this.validateTypeScriptSyntax;
     this.onPhaseProgress = options.onPhaseProgress;
   }
 
@@ -181,7 +193,7 @@ export class PhaseOrchestrator {
           startedAt,
           completedAt: new Date(completedMs).toISOString(),
           durationMs: Math.max(0, completedMs - startedMs),
-          timeoutMs: this.hardTimeoutMs,
+          timeoutMs: this.phaseRequestTimeoutMs,
           status: "completed",
         };
         accumulatedCode = candidateCode;
@@ -213,7 +225,7 @@ export class PhaseOrchestrator {
           startedAt,
           completedAt: new Date(failedMs).toISOString(),
           durationMs: Math.max(0, failedMs - startedMs),
-          timeoutMs: this.hardTimeoutMs,
+          timeoutMs: this.phaseRequestTimeoutMs,
           status: "failed",
         });
         logger.error("Gameplay phase failed; preserving last working state", error, {
@@ -295,26 +307,23 @@ export class PhaseOrchestrator {
       timeoutMs: this.validationTimeoutMs,
     });
     try {
-      const result = await this.runner("npm", ["exec", "tsc", "--", "--noEmit", "--pretty", "false"], {
-        cwd: projectPath,
-        timeoutMs: this.validationTimeoutMs,
-      });
+      const result = await this.validator(candidateCode, targetPath);
       const durationMs = Math.max(0, this.now() - startedMs);
-      const diagnostics = [result.stdout, result.stderr].filter(Boolean).join("\n").slice(-4_000);
       const validation = {
         phase: phase.name,
         attempt,
-        passed: result.exitCode === 0,
+        passed: result.passed,
         durationMs,
-        diagnostics,
+        diagnostics: result.diagnostics.slice(-4_000),
         timestamp: new Date(this.now()).toISOString(),
       };
       if (validation.passed) {
-        logger.info("Gameplay phase TypeScript validation passed", {
-          phase: phase.name,
-          attempt,
-          durationMs,
-        });
+        const context = { phase: phase.name, attempt, durationMs, targetMs: VALIDATION_TARGET_MS };
+        if (durationMs > VALIDATION_TARGET_MS) {
+          logger.warn("Gameplay phase TypeScript validation exceeded timing target", context);
+        } else {
+          logger.info("Gameplay phase TypeScript validation passed", context);
+        }
       }
       return validation;
     } catch (error) {
@@ -333,6 +342,24 @@ export class PhaseOrchestrator {
         timestamp: new Date(this.now()).toISOString(),
       };
     }
+  }
+
+  private validateTypeScriptSyntax(code: string, fileName: string): PhaseSyntaxValidation {
+    const result = ts.transpileModule(code, {
+      compilerOptions: {
+        target: ts.ScriptTarget.ES2022,
+        module: ts.ModuleKind.ESNext,
+        strict: true,
+        noEmitOnError: true,
+      },
+      fileName,
+      reportDiagnostics: true,
+    });
+    const diagnostics = (result.diagnostics ?? [])
+      .filter((diagnostic) => diagnostic.category === ts.DiagnosticCategory.Error)
+      .map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n"))
+      .join("\n");
+    return { passed: diagnostics.length === 0, diagnostics };
   }
 
   private async createBackup(
