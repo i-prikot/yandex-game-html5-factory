@@ -136,10 +136,10 @@ Create `tests/providers/codex-only.test.ts` using the same mock/spy pattern as `
 
 ## Section 12 — Update README.md
 
-- [ ] In `README.md`, find the `AI_PROVIDER` env-var table row and append `codex-only` to its valid-values list with a parenthetical note that it requires `CRS_OAI_KEY`.
-- [ ] Add a new table row for `CRS_OAI_KEY`: describe it as the OpenAI-compatible API key for the CRS proxy, required when `AI_PROVIDER=codex-only`; note it is never embedded in generated source, Vite bundles, Docker images, or ZIP archives.
-- [ ] Add a table row for `CODEX_ONLY_MODEL_DEFAULT` (default: `gpt-5.4`) — fallback model for the `codex-only` provider when no role-specific override is set.
-- [ ] Add table rows for `CODEX_ONLY_MODEL_GAME_PLANNER`, `CODEX_ONLY_MODEL_GAMEPLAY_DEVELOPER`, `CODEX_ONLY_MODEL_BUG_FIXER`, `CODEX_ONLY_MODEL_VISUAL_REVIEWER` — all optional, empty means the provider uses `CODEX_ONLY_MODEL_DEFAULT`.
+- [x] In `README.md`, find the `AI_PROVIDER` env-var table row and append `codex-only` to its valid-values list with a parenthetical note that it requires `CRS_OAI_KEY`.
+- [x] Add a new table row for `CRS_OAI_KEY`: describe it as the OpenAI-compatible API key for the CRS proxy, required when `AI_PROVIDER=codex-only`; note it is never embedded in generated source, Vite bundles, Docker images, or ZIP archives.
+- [x] Add a table row for `CODEX_ONLY_MODEL_DEFAULT` (default: `gpt-5.4`) — fallback model for the `codex-only` provider when no role-specific override is set.
+- [x] Add table rows for `CODEX_ONLY_MODEL_GAME_PLANNER`, `CODEX_ONLY_MODEL_GAMEPLAY_DEVELOPER`, `CODEX_ONLY_MODEL_BUG_FIXER`, `CODEX_ONLY_MODEL_VISUAL_REVIEWER` — all optional, empty means the provider uses `CODEX_ONLY_MODEL_DEFAULT`.
 
 ---
 

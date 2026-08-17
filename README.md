@@ -64,15 +64,21 @@ Copy `.env.example` to `.env`. Empty asset API keys are supported.
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `AI_PROVIDER` | `auto` | Select `claude`, `codex`, or automatic detection |
+| `AI_PROVIDER` | `auto` | Select `claude`, `codex`, `codex-only` (requires `CRS_OAI_KEY`), or automatic detection; `auto` checks only Claude and Codex |
 | `GAME_QUALITY` | `auto` | Select `LOW`, `MEDIUM`, `HIGH`, or runtime detection |
 | `GOOGLE_API_KEY` | empty | Optional image generation |
 | `XAI_API_KEY` | empty | Optional image generation |
 | `TRIPO3D_API_KEY` | empty | Optional 3D generation |
+| `CRS_OAI_KEY` | empty | OpenAI-compatible CRS proxy key; required when `AI_PROVIDER=codex-only` |
+| `CODEX_ONLY_MODEL_DEFAULT` | `gpt-5.4` | Fallback model for Codex-only requests without a role override |
+| `CODEX_ONLY_MODEL_GAME_PLANNER` | empty | Optional `GamePlanner` model; empty uses `CODEX_ONLY_MODEL_DEFAULT` |
+| `CODEX_ONLY_MODEL_GAMEPLAY_DEVELOPER` | empty | Optional `GameplayDeveloper` model; empty uses `CODEX_ONLY_MODEL_DEFAULT` |
+| `CODEX_ONLY_MODEL_BUG_FIXER` | empty | Optional `BugFixer` model; empty uses `CODEX_ONLY_MODEL_DEFAULT` |
+| `CODEX_ONLY_MODEL_VISUAL_REVIEWER` | empty | Optional `VisualReviewer` model; empty uses `CODEX_ONLY_MODEL_DEFAULT` |
 | `YGG_SDK_ENABLED` | `true` | Enable the Yandex Games SDK adapter |
 | `LOG_LEVEL` | `debug` | Structured log threshold; supports `silent` |
 
-API keys stay in the factory process. They are not copied into generated source, Vite bundles, Docker images, or production ZIP files.
+API keys, including `CRS_OAI_KEY`, stay only in the factory process environment. They are not copied into generated game source, factory-generated Codex configuration, Vite bundles, Docker images, or production ZIP files. The Codex-only provider writes an isolated `CODEX_HOME` containing CRS connection settings and a minimal key-free `auth.json`; it never modifies the user's personal `~/.codex` configuration.
 
 ## Project Structure
 
