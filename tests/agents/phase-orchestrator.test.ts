@@ -31,6 +31,7 @@ const passingValidator: PhaseSyntaxValidator = vi.fn(() => ({ passed: true, diag
 afterEach(async () => {
   await Promise.all(createdDirectories.splice(0).map((directory) => rm(directory, { recursive: true, force: true })));
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
 });
 
 async function createProject(): Promise<string> {
@@ -65,7 +66,7 @@ describe("PhaseOrchestrator", () => {
     expect(observedCode).toEqual(["export const initial = true;", "export const revision = 1;"]);
     expect((provider.generateCode as ReturnType<typeof vi.fn>).mock.calls.every((call) => (
       call[2] as { timeoutMs: number }
-    ).timeoutMs === 90_000)).toBe(true);
+    ).timeoutMs === 300_000)).toBe(true);
     expect(result.completedPhases).toEqual(["scene", "combat"]);
     expect(result.code).toBe("export const revision = 2;");
     const backups = await readdir(backupDirectory);
@@ -76,6 +77,45 @@ describe("PhaseOrchestrator", () => {
       "export const initial = true;",
       "export const revision = 1;",
     ]));
+  });
+
+  it("uses the configured gameplay phase request budget", async () => {
+    vi.stubEnv("GAMEPLAY_PHASE_TIMEOUT_MS", "420000");
+    const projectPath = await createProject();
+    const provider = {
+      kind: "codex",
+      generateCode: vi.fn(async () => ({
+        code: "export const configuredTimeout = true;",
+        explanation: "done",
+        files: [],
+      })),
+    } as unknown as IProvider;
+
+    const result = await new PhaseOrchestrator({ validator: passingValidator })
+      .executePhases([phases[0]!], plan, projectPath, provider);
+
+    expect((provider.generateCode as ReturnType<typeof vi.fn>).mock.calls[0]?.[2])
+      .toMatchObject({ timeoutMs: 420_000 });
+    expect(result.phaseTimings[0]).toMatchObject({ timeoutMs: 420_000, status: "completed" });
+  });
+
+  it("falls back to the safe phase budget when configuration is invalid", async () => {
+    vi.stubEnv("GAMEPLAY_PHASE_TIMEOUT_MS", "not-a-timeout");
+    const projectPath = await createProject();
+    const provider = {
+      kind: "codex",
+      generateCode: vi.fn(async () => ({
+        code: "export const fallbackTimeout = true;",
+        explanation: "done",
+        files: [],
+      })),
+    } as unknown as IProvider;
+
+    await new PhaseOrchestrator({ validator: passingValidator })
+      .executePhases([phases[0]!], plan, projectPath, provider);
+
+    expect((provider.generateCode as ReturnType<typeof vi.fn>).mock.calls[0]?.[2])
+      .toMatchObject({ timeoutMs: 300_000 });
   });
 
   it("fails a phase at the hard timeout", async () => {

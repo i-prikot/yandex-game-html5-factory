@@ -10,10 +10,10 @@ import type { GamePlan } from "./game-planner.js";
 import type { GameplayPhase } from "./gameplay-phases.js";
 import { buildPhasePrompt } from "./phase-prompts.js";
 
-const DEFAULT_HARD_TIMEOUT_MS = 120_000;
 const DEFAULT_VALIDATION_TIMEOUT_MS = 15_000;
 const VALIDATION_TARGET_MS = 5_000;
-const PHASE_REQUEST_TIMEOUT_MS = 90_000;
+const DEFAULT_PHASE_REQUEST_TIMEOUT_MS = 300_000;
+const HARD_TIMEOUT_GRACE_MS = 30_000;
 const BACKUP_RETENTION_MS = 24 * 60 * 60 * 1_000;
 
 export interface PhaseTiming {
@@ -81,6 +81,13 @@ export class GameplayPhaseExecutionError extends Error {
 
 const logger = createLogger("phase-orchestrator");
 
+function resolvePhaseRequestTimeoutMs(value = process.env.GAMEPLAY_PHASE_TIMEOUT_MS): number {
+  const timeoutMs = Number(value?.trim());
+  return Number.isSafeInteger(timeoutMs) && timeoutMs > 0
+    ? timeoutMs
+    : DEFAULT_PHASE_REQUEST_TIMEOUT_MS;
+}
+
 function selectReplacement(response: CodeResponse, targetModule: string): string {
   const unexpectedFile = response.files.find((file) => file.content.trim() && file.path !== targetModule);
   if (unexpectedFile) {
@@ -103,8 +110,8 @@ export class PhaseOrchestrator {
   private readonly onPhaseProgress?: PhaseOrchestratorOptions["onPhaseProgress"];
 
   public constructor(options: PhaseOrchestratorOptions = {}) {
-    this.hardTimeoutMs = options.hardTimeoutMs ?? DEFAULT_HARD_TIMEOUT_MS;
-    this.phaseRequestTimeoutMs = options.phaseRequestTimeoutMs ?? PHASE_REQUEST_TIMEOUT_MS;
+    this.phaseRequestTimeoutMs = options.phaseRequestTimeoutMs ?? resolvePhaseRequestTimeoutMs();
+    this.hardTimeoutMs = options.hardTimeoutMs ?? this.phaseRequestTimeoutMs + HARD_TIMEOUT_GRACE_MS;
     this.validationTimeoutMs = options.validationTimeoutMs ?? DEFAULT_VALIDATION_TIMEOUT_MS;
     this.now = options.now ?? Date.now;
     this.validator = options.validator ?? this.validateTypeScriptSyntax;
@@ -131,6 +138,7 @@ export class PhaseOrchestrator {
       projectPath,
       targetModule,
       phaseCount: phases.length,
+      phaseRequestTimeoutMs: this.phaseRequestTimeoutMs,
       hardTimeoutMs: this.hardTimeoutMs,
     });
     for (const [index, phase] of phases.entries()) {

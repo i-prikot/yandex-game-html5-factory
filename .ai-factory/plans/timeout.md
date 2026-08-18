@@ -48,6 +48,18 @@ The timeout occurs in the `gameplay` stage, after planning and scaffolding compl
 
 ## Tasks
 
+### Rework: Remove the 90-second phase timeout regression (2026-08-18)
+
+- [x] **Task R1: Make the bounded phase timeout operationally safe**
+  - [x] Stop overriding provider requests with the too-short fixed `90000ms` deadline
+  - [x] Add `GAMEPLAY_PHASE_TIMEOUT_MS` configuration with a `300000ms` default
+  - [x] Keep the orchestration hard timeout above the provider request deadline
+  - [x] Add regression tests for the default and configured phase budgets
+  - [x] Update timeout documentation and environment examples
+  - [x] **Files:** `src/agents/phase-orchestrator.ts`, `tests/agents/phase-orchestrator.test.ts`, `.env.example`, `docker-compose.yml`, `README.md`
+
+---
+
 ### Phase 1: Design Phase System
 
 - [x] **Task 1.1: Define phase contract interface**
@@ -63,7 +75,7 @@ The timeout occurs in the `gameplay` stage, after planning and scaffolding compl
   - [x] Create `PhaseOrchestrator` class in `src/agents/phase-orchestrator.ts`
   - [x] Implement `executePhases(phases: GameplayPhase[], plan: GamePlan, projectPath: string, provider: IProvider): Promise<PhaseExecutionResult>`
   - [x] Track phase execution state: current phase, completed phases, accumulated code
-  - [x] Add timeout safety: fail fast if any phase exceeds 120000ms (2 minutes)
+  - [x] Add timeout safety: keep an orchestration safeguard above the configurable provider deadline
   - [x] Implement rollback on phase failure: preserve last working state
   - [x] **Files:** `src/agents/phase-orchestrator.ts` (new)
   - [x] **Logging:** `INFO` at phase start/completion, `WARN` on phase timeout, `ERROR` on phase failure
@@ -123,7 +135,7 @@ The timeout occurs in the `gameplay` stage, after planning and scaffolding compl
   - [x] Modify `src/providers/codex.ts` and `src/providers/codex-only.ts` to accept per-request timeout override
   - [x] Change `generateCode()` signature: add optional `timeoutMs` parameter
   - [x] Update `CodexProvider` and `CodexOnlyProvider` to pass timeout to `runProcess`
-  - [x] Default remains 180000ms (3 minutes) for backward compatibility, but phases use 90000ms (1.5 minutes)
+  - [x] Provider defaults remain backward compatible; phases use a configurable 300000ms deadline after rework
   - [x] **Files:** `src/providers/codex.ts` (modify), `src/providers/codex-only.ts` (modify), `src/providers/base.ts` (modify interface)
   - [x] **Logging:** `DEBUG` log effective timeout for each request
   - [x] **Tests:** Unit test timeout override in both providers
@@ -211,7 +223,7 @@ The timeout occurs in the `gameplay` stage, after planning and scaffolding compl
 
 - [x] **Task 6.2: Add phase timing metrics to CLI output**
   - [x] Modify `src/cli/index.ts` to display phase progress during gameplay stage
-  - [x] Show: "Phase 2/5: player-movement (45s / 90s budget)"
+  - [x] Show: "Phase 2/5: player-movement (45s / 300s budget)"
   - [x] On completion, show total phase breakdown: "Phase timings: scaffold=15s, player-movement=45s, ..."
   - [x] Add visual progress bar (optional, use simple text for MVP)
   - [x] **Files:** `src/cli/index.ts` (modify)
@@ -221,7 +233,7 @@ The timeout occurs in the `gameplay` stage, after planning and scaffolding compl
 - [x] **Task 6.3: Update README with timeout improvements**
   - [x] Add section: "How We Eliminated Timeouts" explaining phased generation
   - [x] Document environment variable: `CODEX_ONLY_TIMEOUT_MS` (already exists, but clarify phase usage)
-  - [x] Explain that each phase has its own 90s budget, total can be 5-7 minutes for complex games
+  - [x] Explain that each phase has its own configurable 300s deadline while typical duration remains 60-90s
   - [x] Add FAQ: "What if a single phase still times out?" → Answer: reduce phase scope or increase timeout
   - [x] **Files:** `README.md` (modify)
   - [x] **Logging:** N/A
@@ -309,9 +321,9 @@ docs(gameplay): document phased generation architecture
 
 ### Performance Expectations
 
-- [ ] **Current:** Single 300s+ timeout in gameplay stage
+- [x] **Current:** Single 300s+ timeout in gameplay stage
 - [x] **Target:** 4-5 phases × 60-90s each = 240-450s total, but with progress feedback and no single-point timeout failure
-- [x] **Each phase budget:** 90s (1.5 minutes) with 120s hard timeout
+- [x] **Each phase deadline:** 300s by default with a hard timeout 30s above the request deadline
 - [x] **Total gameplay stage:** 5-7 minutes for complex games, 3-4 minutes for simple games
 
 ### Risks and Mitigations

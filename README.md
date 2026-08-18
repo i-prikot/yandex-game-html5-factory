@@ -75,7 +75,8 @@ Copy `.env.example` to `.env`. Empty asset API keys are supported.
 | `CODEX_ONLY_MODEL_GAMEPLAY_DEVELOPER` | empty | Optional `GameplayDeveloper` model; empty uses `CODEX_ONLY_MODEL_DEFAULT` |
 | `CODEX_ONLY_MODEL_BUG_FIXER` | empty | Optional `BugFixer` model; empty uses `CODEX_ONLY_MODEL_DEFAULT` |
 | `CODEX_ONLY_MODEL_VISUAL_REVIEWER` | empty | Optional `VisualReviewer` model; empty uses `CODEX_ONLY_MODEL_DEFAULT` |
-| `CODEX_ONLY_TIMEOUT_MS` | `300000` in `.env.example` | Default timeout for Codex-only requests; gameplay phases override it with their own 90-second request budget |
+| `CODEX_ONLY_TIMEOUT_MS` | `300000` in `.env.example` | Default timeout for Codex-only requests outside phased gameplay generation |
+| `GAMEPLAY_PHASE_TIMEOUT_MS` | `300000` | Provider request budget for each bounded gameplay phase |
 | `YGG_SDK_ENABLED` | `true` | Enable the Yandex Games SDK adapter |
 | `LOG_LEVEL` | `debug` | Structured log threshold; supports `silent` |
 | `FACTORY_HOST_PORT` | `15173` | Host port mapped to the factory's internal Vite port `5173` |
@@ -86,7 +87,7 @@ API keys, including `CRS_OAI_KEY`, stay only in the factory process environment.
 
 Gameplay code is generated as a sequence of bounded requests instead of one request for the entire game. A 2D game uses four phases (`scaffold`, `player-movement`, `game-logic`, and `ui-integration`); a 3D game uses five (`scene-setup`, `camera-controls`, `player-entity`, `game-mechanics`, and `optimization`). Each phase produces a complete revision of the gameplay module, validates its TypeScript syntax, and writes it before the next phase starts.
 
-Every phase has its own 90-second provider request budget and a 120-second orchestration safeguard. The complete gameplay stage can therefore take 3-4 minutes for a simple game or 5-7 minutes for a complex game without leaving one provider process running until the old 300-second pipeline timeout. The CLI displays live phase position and budget usage, followed by a timing breakdown when generation finishes.
+Every phase has its own 300-second provider request budget by default and an orchestration safeguard 30 seconds above that deadline. The larger deadline applies to one focused phase rather than the former monolithic gameplay request, so slower Codex responses are not killed at 90 seconds while validated code is still written between phases. Set `GAMEPLAY_PHASE_TIMEOUT_MS` when a deployment needs a different budget. The CLI displays live phase position and budget usage, followed by a timing breakdown when generation finishes.
 
 Validated revisions survive later failures. Progress and timings are stored in `.factory/gameplay-phases.json`; syntax checks are recorded in `.factory/phase-validation.json`; and a failed phase writes its details and last working source to `.factory/phase-failure.json`. Starting gameplay generation again resumes from the valid sequential prefix rather than regenerating completed phases.
 
@@ -140,7 +141,7 @@ The supported Windows user path remains Docker; local Node.js is only needed for
 
 **Where are screenshots and pipeline state stored?** Under the generated project's `.factory/` directory; they are excluded from production packages.
 
-**What if a single gameplay phase still times out?** Inspect `.factory/phase-failure.json`, then reduce that phase's scope or raise `phaseRequestTimeoutMs` when constructing `PhaseOrchestrator`. Raising only `CODEX_ONLY_TIMEOUT_MS` does not change the explicit 90-second gameplay phase budget. Rerun generation afterward; completed phases are reused.
+**What if a single gameplay phase still times out?** Inspect `.factory/phase-failure.json`, raise `GAMEPLAY_PHASE_TIMEOUT_MS`, and rerun generation. Completed phases are reused, so the factory continues from the last validated revision instead of regenerating the game.
 
 ## License
 
